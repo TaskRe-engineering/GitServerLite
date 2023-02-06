@@ -1,0 +1,70 @@
+#!/bin/bash
+
+#for debugging
+#set -ex
+
+shopt -s nullglob
+
+DEPLOY_DIR="$GIT_DIR/deploy"
+CONTAINERS=(${GIT_DIR}/containers/*.conf)
+DEPLOYED=false
+
+while read oldrev newrev ref
+do
+        for CONTAINER in "${CONTAINERS[@]}"
+        do      
+                source $CONTAINER
+
+                if [ "$ref" = "refs/heads/$BRANCH" ];
+                then    
+                        if [ ! -z "$BRANCH" ];
+                        then
+                                echo "Ref $ref matching configuration received."
+                                echo "Executing configuration for branch: $BRANCH in file $CONTAINER."
+                                
+                                if [ -z "$IMAGE_NAME" ];
+                                then
+                                        IMAGE_NAME="web-$BRANCH"
+                                        echo "Unable to read image name: default \"$IMAGE_NAME\" used."
+                                else
+                                        echo "Successfully imported image name: \"$IMAGE_NAME\"."
+                                fi
+
+                                if [ -z "$CONTAINER_NAME" ];
+                                then
+                                        CONTAINER_NAME=$IMAGE_NAME
+                                        echo "Unable to read container name: default \"$CONTAINER_NAME\" used."
+                                else
+                                        echo "Successfully imported container name: \"$CONTAINER_NAME\"."
+                                fi
+                                
+                                if [ -z "$PORT" ];
+                                then
+                                        PORT=80
+                                        echo "Unable to read port number: default $PORT used."
+                                else
+                                        echo "Successfully imported port number: $PORT."
+                                fi
+
+                                if [ -z "$RESTART" ];
+                                then
+                                        RESTART="always"
+                                        echo "Unable to read restart configuration: default \"$RESTART\" used."
+                                else
+                                        echo "Successfully imported restart configuration: \"$RESTART\"."
+                                fi
+                                
+                                TARGET="$DEPLOY_DIR/deploy_${BRANCH}"
+                                $GIT_DIR/hooks/post-receive.deploy-files.sh -t $TARGET -g $GIT_DIR -b $BRANCH
+                                $GIT_DIR/hooks/post-receive.deploy-container.sh -p $PORT -t $TARGET -r $RESTART -i $IMAGE_NAME -c $CONTAINER_NAME
+
+                                DEPLOYED=true
+                        fi
+                fi
+        done
+
+        if [ "$DEPLOYED" = "false" ];
+        then
+                echo "Ref $ref received. Doing nothing: does not match branches configured to automatically deploy."
+        fi
+done
