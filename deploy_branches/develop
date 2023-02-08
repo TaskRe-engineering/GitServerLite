@@ -1,0 +1,2 @@
+ENV_FILE=".env.dev"
+CLEAN_ON_DEPLOY=true

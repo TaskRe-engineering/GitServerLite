@@ -5,13 +5,13 @@
 
 shopt -s nullglob
 
-DEPLOY_DIR="$GIT_DIR/deploy"
-CONTAINERS=(${GIT_DIR}/containers/*.conf)
+DEPLOY_DIR="$GIT_DIR/deploy_files"
+BRANCHES=(${GIT_DIR}/deploy_branches/*)
 DEPLOYED=false
 
 while read oldrev newrev ref
 do
-        for CONTAINER in "${CONTAINERS[@]}"
+        for BRANCH in "${BRANCHES[@]}"
         do      
                 source $CONTAINER
 
@@ -20,45 +20,35 @@ do
                         if [ ! -z "$BRANCH" ];
                         then
                                 echo "Ref $ref matching configuration received."
-                                echo "Executing configuration for branch: $BRANCH in file $CONTAINER."
+                                echo "Executing configuration for branch: $BRANCH."
                                 
-                                if [ -z "$IMAGE_NAME" ];
+                                if [ -z "$CLEAN_ON_DEPLOY" ];
                                 then
-                                        IMAGE_NAME="web-$BRANCH"
-                                        echo "Unable to read image name: default \"$IMAGE_NAME\" used."
+                                        CLEAN_ON_DEPLOY=true
+                                        echo "Unable to read clean setting: default \"$CLEAN_ON_DEPLOY\" used."
                                 else
-                                        echo "Successfully imported image name: \"$IMAGE_NAME\"."
-                                fi
-
-                                if [ -z "$CONTAINER_NAME" ];
-                                then
-                                        CONTAINER_NAME=$IMAGE_NAME
-                                        echo "Unable to read container name: default \"$CONTAINER_NAME\" used."
-                                else
-                                        echo "Successfully imported container name: \"$CONTAINER_NAME\"."
+                                        echo "Successfully imported clean setting: \"$CLEAN_ON_DEPLOY\"."
                                 fi
                                 
-                                if [ -z "$PORT" ];
-                                then
-                                        PORT=80
-                                        echo "Unable to read port number: default $PORT used."
-                                else
-                                        echo "Successfully imported port number: $PORT."
-                                fi
-
-                                if [ -z "$RESTART" ];
-                                then
-                                        RESTART="always"
-                                        echo "Unable to read restart configuration: default \"$RESTART\" used."
-                                else
-                                        echo "Successfully imported restart configuration: \"$RESTART\"."
-                                fi
+                                TARGET="$DEPLOY_DIR/deploy_$BRANCH"
+                                echo "Deploying $BRANCH branch on server to target $TARGET..."
+                                mkdir -p $TARGET
+                                git --work-tree=$TARGET --git-dir=$GIT_DIR checkout -f $BRANCH
                                 
-                                TARGET="$DEPLOY_DIR/deploy_${BRANCH}"
-                                $GIT_DIR/hooks/post-receive.deploy-files.sh -t $TARGET -g $GIT_DIR -b $BRANCH
-                                $GIT_DIR/hooks/post-receive.deploy-container.sh -p $PORT -t $TARGET -r $RESTART -i $IMAGE_NAME -c $CONTAINER_NAME
-
+                                if [ -z "$ENV_FILE" ];
+                                then
+                                        echo "Running Docker compose. No environment file specified, so .env will be used if it exists."
+                                        (cd $TARGET && docker compose up -d)
+                                else
+                                        echo "Running Docker compose with environment file $ENV_FILE."
+                                        (cd $TARGET && docker compose --env-file "$ENV_FILE" up -d)
+                                fi
                                 DEPLOYED=true
+
+                                if [ "$CLEAN_ON_DEPLOY" = "true" ];
+                                then
+                                        docker system prune
+                                fi
                         fi
                 fi
         done
