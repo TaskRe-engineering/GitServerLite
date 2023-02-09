@@ -1,0 +1,130 @@
+#!/bin/bash
+
+#for debugging
+#set -ex
+
+DEPLOY_BRANCH_DIR="deploy_branches"
+DEPLOY_FILES_DIR="deploy_files"
+
+log() {
+    echo $1
+}
+
+invalid() {
+    echo $1
+    display_manual
+}
+
+display_manual() {
+    echo "usage: gitserverlite <command> [<args>]"
+    echo ""
+    echo "These are the GitServerLite commands you can run:"
+    echo -e "\thelp\t print the manual to the screen"
+    echo -e "\tinstall <destination>\tinstall a repository at the specified destination"
+}
+
+install_repository() {
+    DESTINATION=$1
+    
+    git init --bare $DESTINATION
+    GIT_DIR=$DESTINATION
+
+    INFO_DIR="$GIT_DIR/.gitserverlite"
+    mkdir -p $INFO_DIR
+    md5 gitserverlite > $INFO_DIR/check
+    echo "DEPLOY_BRANCH_DIR=$DEPLOY_BRANCH_DIR" > $INFO_DIR/locations
+    echo "DEPLOY_FILES_DIR=$DEPLOY_FILES_DIR" >> $INFO_DIR/locations
+    chmod a+x $INFO_DIR/locations
+
+    DEPLOY_DIR="$GIT_DIR/$DEPLOY_FILES_DIR"
+    log "Creating deploy directory in destination $DEPLOY_DIR/"
+    mkdir -p "$DEPLOY_DIR/"
+
+    CONTAINER_DIR="$GIT_DIR/$DEPLOY_BRANCH_DIR"
+    log "Creating container directory in destination $CONTAINER_DIR/"
+    mkdir -p "$CONTAINER_DIR/"
+    cp -r "$DEPLOY_BRANCH_DIR/" "$CONTAINER_DIR/"
+    chmod a+x "$CONTAINER_DIR/."
+
+    HOOKS_DIR="$GIT_DIR/hooks"
+    log "Setting up git hooks in destination $HOOKS_DIR/"
+    cp -rf "hooks/post-receive" "$HOOKS_DIR/"
+    chmod a+x "$HOOKS_DIR/post-receive"
+}
+
+add_branch() {
+    DESTINATION=$1
+
+    echo "Enter the branch name: (required, alphanumeric)"
+    read BRANCH_NAME
+
+    if ! [[ "$BRANCH_NAME" =~ [^a-zA-Z0-9] ]];
+    then
+        echo "Enter the .env file name: (optional)"
+        read ENV_FILE
+
+        echo "Prune system on push?: (y/n)"
+        read PRUNE
+
+        if [ \( "$PRUNE" = "y" \) -o \( "$PRUNE" = "yes" \) ];
+        then
+            PRUNE_ON_DEPLOY=true
+            create_branch_file $DESTINATION $BRANCH_NAME $ENV_FILE $PRUNE_ON_DEPLOY
+        elif [ \( "$PRUNE" = "n" \) -o \( "$PRUNE" = "no" \) ];
+        then
+            PRUNE_ON_DEPLOY=false
+            create_branch_file $DESTINATION $ENV_FILE $PRUNE_ON_DEPLOY
+        else
+            invalid "invalid entry, must by y or n"
+        fi
+    else
+        invalid "invalid branch name"
+    fi
+}
+
+create_branch_file() {
+    DESTINATION=$1
+    BRANCH=$2
+    ENV_FILE=$3
+    PRUNE_ON_DEPLOY=$4
+
+    touch $DESTINATION/$BRANCH
+    
+    if ! [ -z $ENV_FILE ];
+    then
+        cat "ENV_FILE=$ENV_FILE" $DESTINATION/$BRANCH
+    fi
+
+    cat "PRUNE_ON_DEPLOY=$PRUNE_ON_DEPLOY" $DESTINATION/$BRANCH
+
+    chmod a+x $DESTINATION/$BRANCH
+}
+
+COMMAND=$1
+DESTINATION=$2
+
+if [ ! -z "$COMMAND" ];
+then
+    if [ "$COMMAND" = "help" ];
+    then
+        display_manual
+    elif [ "$COMMAND" = "add-branch" ];
+    then
+        add_branch $DESTINATION
+    elif [ "$COMMAND" = "install" ];
+    then
+        if [ ! -z "$DESTINATION" ];
+        then
+            install_repository $DESTINATION
+        else
+            invalid "install command requires a destination"
+            display_manual
+        fi
+    else
+        invalid "unknown command $COMMAND"
+        display_manual
+    fi
+else
+    invalid "command required"
+    display_manual
+fi

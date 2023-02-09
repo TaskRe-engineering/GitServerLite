@@ -7,10 +7,11 @@ shopt -s nullglob
 
 DEPLOY_DIR="$GIT_DIR/deploy_files"
 BRANCHES=(${GIT_DIR}/deploy_branches/*)
-DEPLOYED=false
 
 while read oldrev newrev ref
 do
+        DEPLOYED=false
+
         for BRANCH in "${BRANCHES[@]}"
         do      
                 source $CONTAINER
@@ -22,12 +23,12 @@ do
                                 echo "Ref $ref matching configuration received."
                                 echo "Executing configuration for branch: $BRANCH."
                                 
-                                if [ -z "$CLEAN_ON_DEPLOY" ];
+                                if [ -z "$PRUNE_ON_DEPLOY" ];
                                 then
-                                        CLEAN_ON_DEPLOY=true
-                                        echo "Unable to read clean setting: default \"$CLEAN_ON_DEPLOY\" used."
+                                        PRUNE_ON_DEPLOY=true
+                                        echo "Unable to read prune on deploy setting: default \"$PRUNE_ON_DEPLOY\" used."
                                 else
-                                        echo "Successfully imported clean setting: \"$CLEAN_ON_DEPLOY\"."
+                                        echo "Successfully imported prune on deploy setting: \"$PRUNE_ON_DEPLOY\"."
                                 fi
                                 
                                 TARGET="$DEPLOY_DIR/deploy_$BRANCH"
@@ -45,7 +46,7 @@ do
                                 fi
                                 DEPLOYED=true
 
-                                if [ "$CLEAN_ON_DEPLOY" = "true" ];
+                                if [ "$PRUNE_ON_DEPLOY" = "true" ];
                                 then
                                         docker system prune
                                 fi
