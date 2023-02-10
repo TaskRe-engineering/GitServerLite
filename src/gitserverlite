@@ -3,6 +3,8 @@
 #for debugging
 #set -ex
 
+shopt -s nullglob
+
 source ".gitserverlite/locations"
 
 COMMAND=$1
@@ -30,6 +32,8 @@ display_manual() {
     echo "These are the GitServerLite commands you can run:"
     echo -e "\tadd-branch <branch name>\t adds a deploy branch record"
     echo -e "\tremove-branch <branch name>\t removes a deploy branch record"
+    echo -e "\tlist\t lists all deploy branch records"
+    echo -e "\tshow-branch <branch name>\t shows the contents of a deploy branch record"
     echo -e "\thelp\t print the manual to the screen"
 }
 
@@ -70,6 +74,11 @@ add_branch() {
 remove_branch() {
     BRANCH_NAME=$1
 
+    if [[ -z $BRANCH_NAME ]];
+    then
+        invalid "branch name is required"
+    fi
+
     FILE="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
 
     if [[ ! -f $FILE ]];
@@ -79,6 +88,39 @@ remove_branch() {
 
     rm "$FILE"
     log "Deploy record for branch $BRANCH_NAME successfully removed"
+}
+
+list() {
+    BRANCHES=($DEPLOY_BRANCHES_DIR/*)
+
+    if [[ ${#BRANCHES[@]} == 0 ]];
+    then
+        echo "There are no deploy branch records configured"
+    fi
+
+    for BRANCH in "${BRANCHES[@]}"
+    do
+        echo "$(basename $BRANCH)"
+    done
+}
+
+show_branch() {
+    BRANCH_NAME=$1
+
+    if [[ -z $BRANCH_NAME ]];
+    then
+        invalid "branch name is required"
+    fi
+
+    FILE="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
+
+    if [[ ! -f $FILE ]];
+    then
+        error "deploy record for branch \"$BRANCH_NAME\" not found"
+    fi
+
+    echo -e "Displaying record for deploy branch $BRANCH_NAME"
+    less $FILE
 }
 
 _create_branch_file() {
@@ -95,7 +137,7 @@ _create_branch_file() {
         echo "ENV_FILE=$ENV_FILE" > "$FILE"
     fi
 
-    echo "PRUNE_ON_DEPLOY=$PRUNE_ON_DEPLOY" >> "$FILE"
+    echo -e "PRUNE_ON_DEPLOY=$PRUNE_ON_DEPLOY\n" >> "$FILE"
 }
 
 if [[ -z "$COMMAND" ]];
@@ -112,6 +154,12 @@ then
 elif [ "$COMMAND" = "remove-branch" ];
 then
     remove_branch $ARGUMENT1
+elif [ "$COMMAND" = "list" ];
+then
+    list
+elif [ "$COMMAND" = "show-branch" ];
+then
+    show_branch $ARGUMENT1
 else
     invalid "unknown command \"$COMMAND\""
 fi
