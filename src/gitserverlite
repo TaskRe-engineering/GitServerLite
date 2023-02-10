@@ -1,0 +1,117 @@
+#!/bin/bash
+
+#for debugging
+#set -ex
+
+source ".gitserverlite/locations"
+
+COMMAND=$1
+ARGUMENT1=$2
+
+log() {
+    echo -e $1
+}
+
+invalid() {
+    echo "Invalid: $1"
+    echo ""
+    display_manual
+    exit 1
+}
+
+error() {
+    echo -e "Error: $1"
+    exit 1
+}
+
+display_manual() {
+    echo "usage: gitserverlite <command> [<args>]"
+    echo ""
+    echo "These are the GitServerLite commands you can run:"
+    echo -e "\tadd-branch <branch name>\t adds a deploy branch record"
+    echo -e "\tremove-branch <branch name>\t removes a deploy branch record"
+    echo -e "\thelp\t print the manual to the screen"
+}
+
+add_branch() {
+    BRANCH_NAME=$1
+
+    if [[ -z $BRANCH_NAME ]];
+    then
+        invalid "branch name is required"
+    fi
+
+    if [[ "$BRANCH_NAME" =~ [^a-zA-Z0-9] ]];
+    then
+        invalid "branch name must be alphanumeric"
+    fi
+    
+    echo "Enter the .env file name: (optional)"
+    read ENV_FILE
+
+    echo "Prune system on push?: (y/n)"
+    read PRUNE
+
+    if [[ "$PRUNE" = "y" || "$PRUNE" = "yes" ]];
+    then
+        PRUNE_ON_DEPLOY=true
+    elif [[ "$PRUNE" = "n" || "$PRUNE" = "no" ]];
+    then
+        PRUNE_ON_DEPLOY=false
+    else
+        invalid "must by yes, y, no, or n"
+    fi
+
+    _create_branch_file $BRANCH_NAME $PRUNE_ON_DEPLOY $ENV_FILE
+
+    log "Deploy record for branch \"$BRANCH_NAME\" successfully created"
+}
+
+remove_branch() {
+    BRANCH_NAME=$1
+
+    FILE="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
+
+    if [[ ! -f $FILE ]];
+    then
+        error "deploy record for branch \"$BRANCH_NAME\" not found"
+    fi
+
+    rm "$FILE"
+    log "Deploy record for branch $BRANCH_NAME successfully removed"
+}
+
+_create_branch_file() {
+    BRANCH_NAME=$1
+    PRUNE_ON_DEPLOY=$2
+    ENV_FILE=$3
+
+    FILE="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
+
+    touch "$FILE"
+    
+    if [[ ! -z $ENV_FILE ]];
+    then
+        echo "ENV_FILE=$ENV_FILE" > "$FILE"
+    fi
+
+    echo "PRUNE_ON_DEPLOY=$PRUNE_ON_DEPLOY" >> "$FILE"
+}
+
+if [[ -z "$COMMAND" ]];
+then
+    invalid "command required"
+fi
+
+if [[ "$COMMAND" = "help" ]];
+then
+    display_manual
+elif [ "$COMMAND" = "add-branch" ];
+then
+    add_branch $ARGUMENT1
+elif [ "$COMMAND" = "remove-branch" ];
+then
+    remove_branch $ARGUMENT1
+else
+    invalid "unknown command \"$COMMAND\""
+fi

@@ -1,0 +1,63 @@
+#!/bin/bash
+
+#for debugging
+#set -ex
+
+shopt -s nullglob
+
+source locations
+
+ref=$1
+GIT_DIR=$2
+
+DEPLOY_DIR="$GIT_DIR/$DEPLOY_FILES_DIR"
+BRANCHES=($GIT_DIR/$DEPLOY_BRANCH_DIR/*)
+
+DEPLOYED=false
+
+for BRANCH in "${BRANCHES[@]}"
+do
+        source $CONTAINER
+
+        if [[ "$ref" = "refs/heads/$BRANCH" ]];
+        then
+                if [[ ! -z "$BRANCH" ]];
+                then
+                        echo "Ref $ref matching configuration received."
+                        echo "Executing configuration for branch: $BRANCH."
+                        
+                        if [[ -z "$PRUNE_ON_DEPLOY" ]];
+                        then
+                                PRUNE_ON_DEPLOY=true
+                                echo "Unable to read prune on deploy setting: default \"$PRUNE_ON_DEPLOY\" used."
+                        else
+                                echo "Successfully imported prune on deploy setting: \"$PRUNE_ON_DEPLOY\"."
+                        fi
+                        
+                        TARGET="$DEPLOY_DIR/deploy_$BRANCH"
+                        echo "Deploying $BRANCH branch on server to target $TARGET..."
+                        mkdir -p $TARGET
+                        git --work-tree=$TARGET --git-dir=$GIT_DIR checkout -f $BRANCH
+                        
+                        if [[ -z "$ENV_FILE" ]];
+                        then
+                                echo "Running Docker compose. No environment file specified, so .env will be used if it exists."
+                                (cd $TARGET && docker compose up -d)
+                        else
+                                echo "Running Docker compose with environment file $ENV_FILE."
+                                (cd $TARGET && docker compose --env-file "$ENV_FILE" up -d)
+                        fi
+                        DEPLOYED=true
+
+                        if [[ "$PRUNE_ON_DEPLOY" = "true" ]];
+                        then
+                                docker system prune
+                        fi
+                fi
+        fi
+done
+
+if [[ "$DEPLOYED" = "false" ]];
+then
+        echo "Ref $ref received. Doing nothing: does not match branches configured to automatically deploy."
+fi
