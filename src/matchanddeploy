@@ -5,7 +5,7 @@
 
 shopt -s nullglob
 
-source locations
+source ".gitserverlite/locations"
 
 ref=$1
 GIT_DIR=$2
@@ -15,9 +15,10 @@ BRANCHES=($GIT_DIR/$DEPLOY_BRANCHES_DIR/*)
 
 DEPLOYED=false
 
-for BRANCH in "${BRANCHES[@]}"
+for BRANCH_LOCATION in "${BRANCHES[@]}"
 do
-        source $CONTAINER
+        source $BRANCH_LOCATION
+        BRANCH="$(basename $BRANCH_LOCATION)"
 
         if [[ "$ref" = "refs/heads/$BRANCH" ]];
         then
@@ -51,7 +52,7 @@ do
 
                         if [[ "$PRUNE_ON_DEPLOY" = "true" ]];
                         then
-                                docker system prune
+                                docker system -f prune
                         fi
                 fi
         fi
