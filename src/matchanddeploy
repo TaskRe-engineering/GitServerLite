@@ -43,16 +43,16 @@ do
                         if [[ -z "$ENV_FILE" ]];
                         then
                                 echo "Running Docker compose. No environment file specified, so .env will be used if it exists."
-                                (cd $TARGET && docker compose up -d)
+                                (cd $TARGET; docker compose up --detach)
                         else
                                 echo "Running Docker compose with environment file $ENV_FILE."
-                                (cd $TARGET && docker compose --env-file "$ENV_FILE" up -d)
+                                (cd $TARGET; docker compose --env-file $ENV_FILE up --detach)
                         fi
                         DEPLOYED=true
 
                         if [[ "$PRUNE_ON_DEPLOY" = "true" ]];
                         then
-                                docker system -f prune
+                                docker system prune -f
                         fi
                 fi
         fi
