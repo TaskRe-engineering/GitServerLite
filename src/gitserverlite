@@ -11,10 +11,12 @@
 ##   list                           Lists all branches that will automatically deploy
 ##   show-branch <branch name>      Prints the automatic deployment parameters for a branch
 ##   show-deploy-location           Prints the path to the directory where the repository files are deployed
+##   version                        Prints the installed version
 ##   help                           Print this help
 
 shopt -s nullglob
 
+source ".gitserverlite/version"
 source ".gitserverlite/env"
 DEPLOY_BRANCHES_DIR=".gitserverlite/deploy_branches"
 
@@ -68,7 +70,7 @@ add_branch() {
     then
         PRUNE_ON_DEPLOY=false
     else
-        invalid "must by yes, y, no, or n"
+        invalid "must be yes, y, no, or n"
     fi
 
     _create_branch_file $BRANCH_NAME $PRUNE_ON_DEPLOY $ENV_FILE
@@ -134,6 +136,10 @@ show_deploy_directory() {
     echo "$DEPLOY_DIR/"
 }
 
+show_version() {
+    echo "gitserverlite version $VERSION"
+}
+
 _create_branch_file() {
     BRANCH_NAME=$1
     PRUNE_ON_DEPLOY=$2
@@ -174,6 +180,9 @@ then
 elif [ "$COMMAND" = "show-deploy-location" ];
 then
     show_deploy_directory
+elif [ "$COMMAND" = "version" ];
+then
+    show_version
 else
     invalid "unknown command \"$COMMAND\"."
 fi
