@@ -5,12 +5,11 @@
 
 shopt -s nullglob
 
-source ".gitserverlite/locations"
-
 ref=$1
 GIT_DIR=$2
 
-DEPLOY_DIR="$GIT_DIR/$DEPLOY_FILES_DIR"
+source ".gitserverlite/env"
+DEPLOY_BRANCHES_DIR=".gitserverlite/deploy_branches"
 BRANCHES=($GIT_DIR/$DEPLOY_BRANCHES_DIR/*)
 
 DEPLOYED=false

@@ -3,9 +3,20 @@
 #for debugging
 #set -ex
 
+## Usage: gitserverlite <command> [<arguments>]
+##
+## Commands:
+##   add-branch <branch name>       Adds as branch to automatic deployment
+##   remove-branch <branch name>    Removes a branch from automatic deployment
+##   list                           Lists all branches that will automatically deploy
+##   show-branch <branch name>      Prints the automatic deployment parameters for a branch
+##   show-deploy-location           Prints the path to the directory where the repository files are deployed
+##   help                           Print this help
+
 shopt -s nullglob
 
-source ".gitserverlite/locations"
+source ".gitserverlite/env"
+DEPLOY_BRANCHES_DIR=".gitserverlite/deploy_branches"
 
 COMMAND=$1
 ARGUMENT1=$2
@@ -27,14 +38,8 @@ error() {
 }
 
 display_manual() {
-    echo "usage: gitserverlite <command> [<args>]"
-    echo ""
-    echo "These are the GitServerLite commands you can run:"
-    echo -e "\tadd-branch <branch name>\t adds a deploy branch record"
-    echo -e "\tremove-branch <branch name>\t removes a deploy branch record"
-    echo -e "\tlist\t lists all deploy branch records"
-    echo -e "\tshow-branch <branch name>\t shows the contents of a deploy branch record"
-    echo -e "\thelp\t print the manual to the screen"
+    [ "$*" ] && echo "$0: $*"
+    sed -n '/^##/,/^$/s/^## \{0,1\}//p' "$0"
 }
 
 add_branch() {
@@ -42,12 +47,12 @@ add_branch() {
 
     if [[ -z $BRANCH_NAME ]];
     then
-        invalid "branch name is required"
+        invalid "branch name is required."
     fi
 
     if [[ "$BRANCH_NAME" =~ [^a-zA-Z0-9] ]];
     then
-        invalid "branch name must be alphanumeric"
+        invalid "branch name must be alphanumeric."
     fi
     
     echo "Enter the .env file name: (optional)"
@@ -68,7 +73,7 @@ add_branch() {
 
     _create_branch_file $BRANCH_NAME $PRUNE_ON_DEPLOY $ENV_FILE
 
-    log "Deploy record for branch \"$BRANCH_NAME\" successfully created"
+    log "Deploy record for branch \"$BRANCH_NAME\" successfully created."
 }
 
 remove_branch() {
@@ -76,18 +81,18 @@ remove_branch() {
 
     if [[ -z $BRANCH_NAME ]];
     then
-        invalid "branch name is required"
+        invalid "branch name is required."
     fi
 
     FILE="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
 
     if [[ ! -f $FILE ]];
     then
-        error "deploy record for branch \"$BRANCH_NAME\" not found"
+        error "deploy record for branch \"$BRANCH_NAME\" not found."
     fi
 
     rm "$FILE"
-    log "Deploy record for branch $BRANCH_NAME successfully removed"
+    log "Deploy record for branch $BRANCH_NAME successfully removed."
 }
 
 list() {
@@ -95,7 +100,7 @@ list() {
 
     if [[ ${#BRANCHES[@]} == 0 ]];
     then
-        echo "There are no deploy branch records configured"
+        echo "There are no deploy branch records configured."
     fi
 
     for BRANCH in "${BRANCHES[@]}"
@@ -109,18 +114,24 @@ show_branch() {
 
     if [[ -z $BRANCH_NAME ]];
     then
-        invalid "branch name is required"
+        invalid "branch name is required."
     fi
 
-    FILE="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
+    BRANCH="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
 
-    if [[ ! -f $FILE ]];
+    if [[ ! -f $BRANCH ]];
     then
-        error "deploy record for branch \"$BRANCH_NAME\" not found"
+        error "deploy record for branch \"$BRANCH_NAME\" not found."
     fi
 
-    echo -e "Displaying record for deploy branch $BRANCH_NAME"
-    less $FILE
+    echo -e "Displaying record for deploy branch $BRANCH_NAME:"
+    echo "==== START ===="
+    cat $BRANCH
+    echo -e "===== END =====\n"
+}
+
+show_deploy_directory() {
+    echo "$DEPLOY_DIR/"
 }
 
 _create_branch_file() {
@@ -142,7 +153,7 @@ _create_branch_file() {
 
 if [[ -z "$COMMAND" ]];
 then
-    invalid "command required"
+    invalid "command required."
 fi
 
 if [[ "$COMMAND" = "help" ]];
@@ -160,6 +171,9 @@ then
 elif [ "$COMMAND" = "show-branch" ];
 then
     show_branch $ARGUMENT1
+elif [ "$COMMAND" = "show-deploy-location" ];
+then
+    show_deploy_directory
 else
-    invalid "unknown command \"$COMMAND\""
+    invalid "unknown command \"$COMMAND\"."
 fi

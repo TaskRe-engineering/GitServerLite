@@ -1,2 +1,0 @@
-ENV_FILE=".env"
-PRUNE_ON_DEPLOY=true
