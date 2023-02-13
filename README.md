@@ -30,6 +30,11 @@ If you are using SSH, this will likely be the user called **git**.
 It is very important that the GitServerLite scripts are executable by the user that will be pushing to the repository.
 
 Clone GitServerLite and navigate to the root of the repository.
+It is very important to fetch the tags, since these are used to keep track of the version of GitServerLite that you are running.
+```bash
+git fetch --tags
+```
+
 To install a new server, run the command:
 
 ```bash
