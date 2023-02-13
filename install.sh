@@ -23,7 +23,16 @@ git -C $DESTINATION rev-parse 2>/dev/null
 if [[ $? = 0 ]];
 then
     echo "An existing Git repository was found at the destination."
-    echo "Skipping re-initialization of the repository."
+    IS_BARE=$(git -C $DESTINATION rev-parse --is-bare-repository)
+    if [[ "$IS_BARE" = "false" ]];
+    then
+        echo "Error: This is not a bare repository. The installation can only proceed using a bare respoitory."
+        echo "Create a new repository or select a different location."
+        exit 1
+    else
+        echo "This is a bare repository and elibible for installation."
+        echo "Skipping re-initialization of the repository."
+    fi
 else
     echo "No Git repository was found at the destination."
     echo "Initializing a new installation at location $DESTINATION/"
@@ -39,7 +48,8 @@ then
 
     if [[ "$EXISTING_HASH" = "$NEW_HASH" ]];
     then
-        echo "Existing post-receive Gi hook matches new one. Continuing with installation."
+        echo "An existing post-receive Git hook was found that matches the one in the installer."
+        echo "Continuing with the installation..."
     else
         echo -e "An existing post-receive Git hook was found at \"$HOOKS_DIR/post-receive\" that does not match the one being installed."
         echo "Proceeding with the installation will replace the existing file."
@@ -53,7 +63,7 @@ then
             echo "Continuing with the installation..."
         elif [[ "$CONFIRMATION" = "n" || "$CONFIRMATION" = "no" ]];
         then
-            echo "Installation cancelled by user. No files were changed."
+            echo "Error: Installation cancelled by user. No files were changed."
             exit 1
         else
             echo -e "Error: must be \"yes\", \"y\", \"no\", or \"n\""
