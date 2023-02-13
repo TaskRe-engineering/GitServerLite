@@ -1,8 +1,5 @@
 #!/bin/bash
 
-#for debugging
-#set -ex
-
 while read oldrev newrev ref
 do
         "$GIT_DIR/.gitserverlite/matchanddeploy" $ref $GIT_DIR
