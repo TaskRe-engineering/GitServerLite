@@ -100,12 +100,12 @@ chmod a+x "$MAIN_DIR/matchanddeploy"
 if [[ -z $DEPLOY_DIR ]];
 then
     DEPLOY_DIR="$GIT_DIR/deploy"
+    mkdir -p "$DEPLOY_DIR"
     echo -e "DEPLOY_DIR=\"deploy\"" >> "$MAIN_DIR/env"
     echo "Deploy location set to: \"deploy/\"."
 else
     echo -e "Existing deploy location \"$DEPLOY_DIR/\" used."
 fi
-mkdir -p "$DEPLOY_DIR"
 
 DEPLOY_BRANCHES_DIR="$MAIN_DIR/deploy_branches"
 mkdir -p "$DEPLOY_BRANCHES_DIR"
