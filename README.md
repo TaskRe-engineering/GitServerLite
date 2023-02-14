@@ -72,7 +72,7 @@ To add a deploy branch record, run
 You can also use this to overwrite an existing record.
 If there is already a deploy branch record with that name, it will simply be replaced.
 
-You will be prompted to enter the (optional) name of an `.env` file, as well as a flag to control whether or not `docker system prune` is run after each deployment to prevent cluttering the server.
+You will be prompted to enter the (optional) name of an `.env` file.
 `.env` files allow you to use variables in your Docker Compose configuration, which generally represent different environments (e.g. production, testing, prototyping, etc.).
 
 For example, `.env` could represent a production environment and specifies the port `443` for a published HTTPS service, while `.env.dev` could represent a testing environment and uses the port `8443` for that same service to allow for separate testing.
@@ -129,6 +129,22 @@ To show the list of GitServerLite commands, run
 ```bash
 ./gitserverlite help
 ```
+
+## Hooks
+
+GitServerLite uses the post-receive Git hook, and it's not recommended to edit this file.
+
+Instead, it adds two additional hooks which will be run immediately before and after the deployment, respectively.
+
+Make sure all hooks are executable by the user that will be pushing to the repository.
+
+### Pre-deploy
+
+The pre-deploy hook will run immediately after post-reploy is run but before deployment starts. To create a file in the Git repository's `hooks` folder called `pre-deploy`.
+
+### Post-deploy
+
+The post-deploy hook will run immediately after deployment completes. To create a file in the Git repository's `hooks` folder called `post-deploy`.
 
 ## License
 

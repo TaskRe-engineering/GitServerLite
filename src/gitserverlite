@@ -68,20 +68,7 @@ add_branch() {
     echo "Enter the .env file name: (optional)"
     read ENV_FILE
 
-    echo "Prune system on push?: (y/n)"
-    read PRUNE
-
-    if [[ "$PRUNE" = "y" || "$PRUNE" = "yes" ]];
-    then
-        PRUNE_ON_DEPLOY=true
-    elif [[ "$PRUNE" = "n" || "$PRUNE" = "no" ]];
-    then
-        PRUNE_ON_DEPLOY=false
-    else
-        invalid "must be yes, y, no, or n"
-    fi
-
-    _create_branch_file $BRANCH_NAME $PRUNE_ON_DEPLOY $ENV_FILE
+    _create_branch_file $BRANCH_NAME $ENV_FILE
 
     log "Deploy record for branch \"$BRANCH_NAME\" successfully created."
 }
@@ -150,19 +137,16 @@ show_version() {
 
 _create_branch_file() {
     BRANCH_NAME=$1
-    PRUNE_ON_DEPLOY=$2
-    ENV_FILE=$3
+    ENV_FILE=$2
 
     FILE="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
 
-    touch "$FILE"
+    echo -e "# Deploy branch record for branch \"$BRANCH_NAME\"" > "$FILE"
     
     if [[ ! -z $ENV_FILE ]];
     then
-        echo "ENV_FILE=$ENV_FILE" > "$FILE"
+        echo "ENV_FILE=$ENV_FILE" >> "$FILE"
     fi
-
-    echo -e "PRUNE_ON_DEPLOY=$PRUNE_ON_DEPLOY\n" >> "$FILE"
 }
 
 if [[ -z "$COMMAND" ]];

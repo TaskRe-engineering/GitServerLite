@@ -2,5 +2,15 @@
 
 while read oldrev newrev ref
 do
+        if [[ -f "$GIT_DIR/hooks/pre-deploy" ]];
+        then
+                "$GIT_DIR/hooks/pre-deploy"
+        fi
+
         "$GIT_DIR/.gitserverlite/matchanddeploy" $ref $GIT_DIR
+
+        if [[ -f "$GIT_DIR/hooks/post-deploy" ]];
+        then
+                "$GIT_DIR/hooks/post-deploy"
+        fi
 done

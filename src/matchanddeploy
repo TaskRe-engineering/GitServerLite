@@ -34,14 +34,6 @@ do
                         echo "Ref $ref matching configuration received."
                         echo "Executing configuration for branch: $BRANCH."
                         
-                        if [[ -z "$PRUNE_ON_DEPLOY" ]];
-                        then
-                                PRUNE_ON_DEPLOY=true
-                                echo "Unable to read prune on deploy setting: default \"$PRUNE_ON_DEPLOY\" used."
-                        else
-                                echo "Successfully imported prune on deploy setting: \"$PRUNE_ON_DEPLOY\"."
-                        fi
-                        
                         TARGET="$DEPLOY_DIR/deploy_$BRANCH"
                         echo "Deploying $BRANCH branch on server to target $TARGET..."
                         mkdir -p $TARGET
@@ -56,11 +48,6 @@ do
                                 (cd $TARGET; docker compose --env-file $ENV_FILE up --detach)
                         fi
                         DEPLOYED=true
-
-                        if [[ "$PRUNE_ON_DEPLOY" = "true" ]];
-                        then
-                                docker system prune -f
-                        fi
                 fi
         fi
 done

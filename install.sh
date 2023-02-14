@@ -13,6 +13,8 @@
 
 DESTINATION=$1
 
+git fetch --tags
+
 if [[ -z $DESTINATION ]];
 then
     echo "Error: desination is required."
