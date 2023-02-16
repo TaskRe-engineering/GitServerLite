@@ -45,7 +45,7 @@ do
                                 (cd $TARGET; docker compose up --detach)
                         else
                                 echo "Running Docker compose with environment file $ENV_FILE."
-                                (cd $TARGET; docker compose --env-file $ENV_FILE up --detach)
+                                (cd $TARGET; docker compose --env-file $ENV_FILE up --build --detach)
                         fi
                         DEPLOYED=true
                 fi
