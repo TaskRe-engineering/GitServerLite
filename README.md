@@ -3,7 +3,7 @@
 ## Summary
 
 GitServerLite is a lightweight set of scripts to set up and manage a Git repository that automatically deploys your Dockerized services for you.
-You can easily set it up to automatically deploy your services when you push to a specific branch, and even supports mapping branches to the deployment of different environments.
+You can easily set it up to automatically deploy your services when you push to a specific branch, and even supports mapping multiple branches their own deployment environments.
 All you need is the GitServerLite install script, Git, and Docker.
 
 ## Requirements
