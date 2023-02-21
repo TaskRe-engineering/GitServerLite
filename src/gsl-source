@@ -18,15 +18,15 @@ process() {
         BRANCH=$4
         ENV_FILE=$5
 
-        RESULT=""
+        local RESULT=""
 
         if [[ ! -z "$BRANCH" ]];
         then
                 TARGET="$DEPLOY_DIR/deploy_$BRANCH"
-                CHECKOUT="$(checkout $GIT_DIR $BRANCH $TARGET)"
+                CHECKOUT="$(_git_checkout $GIT_DIR $BRANCH $TARGET)"
                 DEPLOY="$(deploy $TARGET $PARAMS $ENV_FILE)"
                 RESULT="$CHECKOUT;$DEPLOY"
-        else
+        fi
 
         echo "$RESULT"
 }
@@ -35,11 +35,11 @@ match() {
         ref=$1
         BRANCHES=$2
 
-        MATCH=""
+        local MATCH=""
 
         for BRANCH_LOCATION in "${BRANCHES[@]}"
         do
-                BRANCH="$(_get_branch_from_location $BRANCH_LOCATION)"
+                BRANCH="$(branch $BRANCH_LOCATION)"
 
                 if [[ "$ref" = "refs/heads/$BRANCH" ]];
                 then
@@ -60,9 +60,9 @@ deploy() {
                 COMMAND="$($_docker_compose_up_without_env $TARGET $PARAMS)"
         else
                 COMMAND="$($_docker_compose_up_with_env $TARGET $PARAMS $ENV_FILE)"
-                (cd $TARGET; eval $COMMAND)
         fi
         
+        (cd $TARGET; eval $COMMAND)
         echo "$COMMAND"
 }
 
@@ -72,13 +72,31 @@ read_branch_record() {
         source $BRANCH_LOCATION
 }
 
+branch() {
+        BRANCH_LOCATION=$1
+        DEPLOY_BRANCHES_DIR=$2
+        
+        if [[ -z $BRANCH_LOCATION ]];
+        then
+                exit 1
+        fi
+        
+        RAW_BRANCH="${BRANCH_LOCATION#$DEPLOY_BRANCHES_DIR}"
+        
+        if [[ $RAW_BRANCH == /* ]];
+        then
+                echo "${RAW_BRANCH:1}"
+        else
+                echo "$RAW_BRANCH"
+        fi
+}
+
 _git_checkout() {
         GIT_DIR=$1
         BRANCH=$2
         TARGET=$3
         
-        COMMAND="git --work-tree=$TARGET --git-dir=$GIT_DIR checkout -f $BRANCH"
-        (mkdir -p $TARGET; eval $COMMAND)
+        (mkdir -p $TARGET;git --work-tree=$TARGET --git-dir=$GIT_DIR checkout -f $BRANCH)
         echo "$COMMAND"
 }
 
@@ -86,8 +104,7 @@ _docker_compose_up_without_env() {
         TARGET=$1
         PARAMS=$2
         
-        COMMAND="docker compose up $PARAMS"
-        (cd $TARGET; eval $COMMAND)
+        (cd $TARGET; docker compose up $PARAMS)
         echo $COMMAND
 }
 
@@ -96,22 +113,18 @@ _docker_compose_up_with_env() {
         PARAMS=$2
         ENV_FILE=$3
 
-        COMMAND="docker compose --env-file $ENV_FILE up $PARAMS"
-        (cd $TARGET; eval $COMMAND)
+        (cd $TARGET; docker compose --env-file $ENV_FILE up $PARAMS)
         echo $COMMAND
 }
 
-_get_branch_from_location() {
-        BRANCH_LOCATION=$1
+_run() {
+        COMMAND=$1
 
-        BRANCH=""
-        
-        if [[ -z $BRANCH_LOCATION ]];
+        if [[ -z $COMMAND ]];
         then
                 exit 1
-        else
-                BRANCH="$(basename $BRANCH_LOCATION)"
         fi
 
-        echo "$BRANCH"
+        eval $COMMAND
+        echo $COMMAND
 }

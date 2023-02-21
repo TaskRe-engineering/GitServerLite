@@ -21,13 +21,13 @@ SOURCE_DIR=".gitserverlite"
 source "$SOURCE_DIR/env"
 source "$SOURCE_DIR/gsl-source"
 
-DEPLOY_BRANCHES_DIR="$SOURCE_DIR/deploy_branches"
-BRANCHES=($GIT_DIR/$DEPLOY_BRANCHES_DIR/*)
+DEPLOY_BRANCHES_DIR="$GIT_DIR/$SOURCE_DIR/deploy_branches"
+BRANCHES=($DEPLOY_BRANCHES_DIR/*)
 
 PARAMS="--build --detach"
 
 BRANCH_LOCATION="$(match $ref $BRANCHES)"
-BRANCH="$(_get_branch_from_location $BRANCH_LOCATION)"
+BRANCH="$(branch $BRANCH_LOCATION $DEPLOY_BRANCHES_DIR)"
 
 if [[ ! -z "$BRANCH" ]];
 then
