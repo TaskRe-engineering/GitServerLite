@@ -9,50 +9,33 @@
 # 
 # This source code is licensed under the [] license found in the
 # LICENSE file in the root directory of this source tree. 
-# 
+#
 
 shopt -s nullglob
 
 ref=$1
 GIT_DIR=$2
 
-source ".gitserverlite/env"
-DEPLOY_BRANCHES_DIR=".gitserverlite/deploy_branches"
+SOURCE_DIR=".gitserverlite"
+
+source "$SOURCE_DIR/env"
+source "$SOURCE_DIR/gsl-source"
+
+DEPLOY_BRANCHES_DIR="$SOURCE_DIR/deploy_branches"
 BRANCHES=($GIT_DIR/$DEPLOY_BRANCHES_DIR/*)
 
-DEPLOYED=false
+PARAMS="--build --detach"
 
-for BRANCH_LOCATION in "${BRANCHES[@]}"
-do
-        source $BRANCH_LOCATION
-        BRANCH="$(basename $BRANCH_LOCATION)"
+BRANCH_LOCATION="$(match $ref $BRANCHES)"
+BRANCH="$(_get_branch_from_location $BRANCH_LOCATION)"
 
-        if [[ "$ref" = "refs/heads/$BRANCH" ]];
-        then
-                if [[ ! -z "$BRANCH" ]];
-                then
-                        echo "Ref $ref matching configuration received."
-                        echo "Executing configuration for branch: $BRANCH."
-                        
-                        TARGET="$DEPLOY_DIR/deploy_$BRANCH"
-                        echo "Deploying $BRANCH branch on server to target $TARGET..."
-                        mkdir -p $TARGET
-                        git --work-tree=$TARGET --git-dir=$GIT_DIR checkout -f $BRANCH
-                        
-                        if [[ -z "$ENV_FILE" ]];
-                        then
-                                echo "Running Docker compose. No environment file specified, so .env will be used if it exists."
-                                (cd $TARGET; docker compose up --detach)
-                        else
-                                echo "Running Docker compose with environment file $ENV_FILE."
-                                (cd $TARGET; docker compose --env-file $ENV_FILE up --build --detach)
-                        fi
-                        DEPLOYED=true
-                fi
-        fi
-done
-
-if [[ "$DEPLOYED" = "false" ]];
+if [[ ! -z "$BRANCH" ]];
 then
+        echo "Ref $ref matching configuration received."
+        echo "Executing configuration for branch: $BRANCH"
+
+        read_branch_record $BRANCH_LOCATION
+        RESULT="$(process $GIT_DIR $DEPLOY_DIR $PARAMS $BRANCH $ENV_FILE)"
+else
         echo "Ref $ref received. Doing nothing: does not match branches configured to automatically deploy."
 fi
