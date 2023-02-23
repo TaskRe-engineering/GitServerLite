@@ -18,16 +18,15 @@ process() {
         BRANCH="$4"
         ENV_FILE="$5"
 
-        local RESULT=""
-
-        if [[ ! -z "$BRANCH" ]];
+        if [[ -z "$GIT_DIR" || -z "$DEPLOY_DIR" || -z "$PARAMS" || -z "$BRANCH" ]];
         then
-                TARGET="$DEPLOY_DIR/deploy_$BRANCH"
-                CHECKOUT="$(checkout $GIT_DIR $BRANCH $TARGET)"
-                DEPLOY="$(deploy $TARGET $PARAMS $ENV_FILE)"
-                RESULT="$CHECKOUT;$DEPLOY"
+                exit 1
         fi
+        
+        TARGET="$DEPLOY_DIR/deploy_$BRANCH"
+        PROCESS_CMD="checkout "$GIT_DIR" "$BRANCH" "$TARGET"; deploy "$TARGET" \""$PARAMS"\" "$ENV_FILE""
 
+        RESULT="$(_run "$PROCESS_CMD")"
         echo "$RESULT"
 }
 
@@ -86,12 +85,6 @@ deploy() {
         echo "$RESULT"
 }
 
-read() {
-        BRANCH_LOCATION="$1"
-
-        source "$BRANCH_LOCATION"
-}
-
 branch() {
         BRANCH_LOCATION="$1"
         DEPLOY_BRANCHES_DIR="$2"
@@ -109,6 +102,12 @@ branch() {
         else
                 echo "$RAW_BRANCH"
         fi
+}
+
+read() {
+        BRANCH_LOCATION="$1"
+
+        source "$BRANCH_LOCATION"
 }
 
 _run() {

@@ -15,17 +15,17 @@ _run() {
 
 test_checkout_NoGitDir_ExpectedExitStatus() {
     (checkout)
-    assertEquals 1 $?
+    assertEquals 1 "$?"
 }
 
 test_checkout_NoBranch_ExpectedExitStatus() {
     (checkout /var/git/my_repo.git)
-    assertEquals 1 $?
+    assertEquals 1 "$?"
 }
 
 test_checkout_NoTarget_ExpectedExitStatus() {
     (checkout /var/git/my_repo.git "main")
-    assertEquals 1 $?
+    assertEquals 1 "$?"
 }
 
 test_checkout_ValidParametersSingleWorkdBranch_ReturnsExpected() {

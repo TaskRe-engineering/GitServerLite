@@ -15,12 +15,12 @@ _run() {
 
 test_deploy_NoTarget_ExpectedExitStatus() {
     (deploy)
-    assertEquals 1 $?
+    assertEquals 1 "$?"
 }
 
 test_deploy_NoParameters_ExpectedExitStatus() {
     (deploy /var/deploy)
-    assertEquals 1 $?
+    assertEquals 1 "$?"
 }
 
 test_deploy_NoEnvFile_ReturnExpected() {

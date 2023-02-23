@@ -30,10 +30,11 @@ BRANCH_LOCATION="$(match $ref $BRANCHES)"
 if [[ ! -z "$BRANCH_LOCATION" ]];
 then
         echo "Ref $ref matching configuration received."
+
+        read $BRANCH_LOCATION
+        BRANCH="$(branch $BRANCH_LOCATION $DEPLOY_BRANCHES_DIR)"
+        
+        process $GIT_DIR $DEPLOY_DIR $PARAMS $BRANCH $ENV_FILE
 else
         echo "Ref $ref received. Doing nothing: does not match branches configured to automatically deploy."
 fi
-read $BRANCH_LOCATION
-
-BRANCH="$(branch $BRANCH_LOCATION $DEPLOY_BRANCHES_DIR)"
-RESULT="$(process $GIT_DIR $DEPLOY_DIR $PARAMS $BRANCH $ENV_FILE)"
