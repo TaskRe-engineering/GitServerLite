@@ -26,13 +26,13 @@ BRANCHES=($DEPLOY_BRANCHES_DIR/*)
 
 PARAMS="--build --detach"
 
-BRANCH_LOCATION="$(match $ref $BRANCHES)"
-if [[ ! -z "$BRANCH_LOCATION" ]];
+MATCH="$(match $ref $BRANCHES)"
+if [[ ! -z "$MATCH" ]];
 then
-        echo "Ref $ref matching configuration received."
+        echo "Ref $ref received. Matches branch configured to automatically deploy."
 
-        read $BRANCH_LOCATION
-        BRANCH="$(branch $BRANCH_LOCATION $DEPLOY_BRANCHES_DIR)"
+        read $MATCH
+        BRANCH="$(branch $MATCH $DEPLOY_BRANCHES_DIR)"
         
         process $GIT_DIR $DEPLOY_DIR $PARAMS $BRANCH $ENV_FILE
 else
