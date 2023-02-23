@@ -12,18 +12,18 @@
 #
 
 process() {
-        GIT_DIR=$1
-        DEPLOY_DIR=$2
-        PARAMS=$3
-        BRANCH=$4
-        ENV_FILE=$5
+        GIT_DIR="$1"
+        DEPLOY_DIR="$2"
+        PARAMS="$3"
+        BRANCH="$4"
+        ENV_FILE="$5"
 
         local RESULT=""
 
         if [[ ! -z "$BRANCH" ]];
         then
                 TARGET="$DEPLOY_DIR/deploy_$BRANCH"
-                CHECKOUT="$(_git_checkout $GIT_DIR $BRANCH $TARGET)"
+                CHECKOUT="$(checkout $GIT_DIR $BRANCH $TARGET)"
                 DEPLOY="$(deploy $TARGET $PARAMS $ENV_FILE)"
                 RESULT="$CHECKOUT;$DEPLOY"
         fi
@@ -32,8 +32,8 @@ process() {
 }
 
 match() {
-        ref=$1
-        BRANCHES=$2
+        ref="$1"
+        BRANCHES="$2"
 
         local MATCH=""
 
@@ -50,33 +50,53 @@ match() {
         echo "$MATCH"
 }
 
+checkout() {
+        GIT_DIR="$1"
+        BRANCH="$2"
+        TARGET="$3"
+
+        if [[ -z "$GIT_DIR" || -z "$BRANCH" || -z "$TARGET" ]];
+        then
+                exit 1
+        fi
+        
+        CHECKOUT_CMD="mkdir -p "$TARGET"; git --work-tree="$TARGET" --git-dir="$GIT_DIR" checkout -f "$BRANCH""
+        RESULT="$(_run "$CHECKOUT_CMD")"
+        echo "$RESULT"
+}
+
 deploy() {
-        TARGET=$1
-        PARAMS=$2
-        ENV_FILE=$3
+        TARGET="$1"
+        PARAMS="$2"
+        ENV_FILE="$3"
+
+        if [[ -z "$TARGET" || -z "$PARAMS" ]];
+        then
+                exit 1
+        fi
 
         if [[ -z "$ENV_FILE" ]];
         then
-                COMMAND="$($_docker_compose_up_without_env $TARGET $PARAMS)"
+                DEPLOY_CMD="cd "$TARGET"; docker compose up $PARAMS"
         else
-                COMMAND="$($_docker_compose_up_with_env $TARGET $PARAMS $ENV_FILE)"
+                DEPLOY_CMD="cd "$TARGET"; docker compose --env-file "$ENV_FILE" up $PARAMS"
         fi
         
-        (cd $TARGET; eval $COMMAND)
-        echo "$COMMAND"
+        RESULT="$(_run "$DEPLOY_CMD")"
+        echo "$RESULT"
 }
 
-read_branch_record() {
-        BRANCH_LOCATION=$1
+read() {
+        BRANCH_LOCATION="$1"
 
-        source $BRANCH_LOCATION
+        source "$BRANCH_LOCATION"
 }
 
 branch() {
-        BRANCH_LOCATION=$1
-        DEPLOY_BRANCHES_DIR=$2
+        BRANCH_LOCATION="$1"
+        DEPLOY_BRANCHES_DIR="$2"
         
-        if [[ -z $BRANCH_LOCATION ]];
+        if [[ -z "$BRANCH_LOCATION" ]];
         then
                 exit 1
         fi
@@ -91,40 +111,14 @@ branch() {
         fi
 }
 
-_git_checkout() {
-        GIT_DIR=$1
-        BRANCH=$2
-        TARGET=$3
-        
-        (mkdir -p $TARGET;git --work-tree=$TARGET --git-dir=$GIT_DIR checkout -f $BRANCH)
-        echo "$COMMAND"
-}
-
-_docker_compose_up_without_env() {
-        TARGET=$1
-        PARAMS=$2
-        
-        (cd $TARGET; docker compose up $PARAMS)
-        echo $COMMAND
-}
-
-_docker_compose_up_with_env() {
-        TARGET=$1
-        PARAMS=$2
-        ENV_FILE=$3
-
-        (cd $TARGET; docker compose --env-file $ENV_FILE up $PARAMS)
-        echo $COMMAND
-}
-
 _run() {
-        COMMAND=$1
+        COMMAND="$1"
 
-        if [[ -z $COMMAND ]];
+        if [[ -z "$COMMAND" ]];
         then
                 exit 1
         fi
 
-        eval $COMMAND
-        echo $COMMAND
+        eval "$COMMAND"
+        echo "$COMMAND"
 }
