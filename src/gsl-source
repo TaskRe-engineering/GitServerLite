@@ -24,9 +24,9 @@ process() {
         fi
         
         TARGET="$DEPLOY_DIR/deploy_$BRANCH"
-        PROCESS_CMD="checkout "$GIT_DIR" "$BRANCH" "$TARGET"; deploy "$TARGET" \""$PARAMS"\" "$ENV_FILE""
+        local PROCESS_CMD="checkout "$GIT_DIR" "$BRANCH" "$TARGET"; deploy "$TARGET" \""$PARAMS"\" "$ENV_FILE""
 
-        RESULT="$(_run "$PROCESS_CMD")"
+        local RESULT="$(_run "$PROCESS_CMD")"
         echo "$RESULT"
 }
 
@@ -38,11 +38,11 @@ match() {
 
         for BRANCH_LOCATION in "${BRANCHES[@]}"
         do
-                BRANCH="$(branch $BRANCH_LOCATION)"
+                local BRANCH="$(branch $BRANCH_LOCATION)"
 
                 if [[ "$ref" = "refs/heads/$BRANCH" ]];
                 then
-                        MATCH="$BRANCH_LOCATION"
+                        local MATCH="$BRANCH_LOCATION"
                 fi
         done
 
@@ -59,8 +59,8 @@ checkout() {
                 exit 1
         fi
         
-        CHECKOUT_CMD="mkdir -p "$TARGET"; git --work-tree="$TARGET" --git-dir="$GIT_DIR" checkout -f "$BRANCH""
-        RESULT="$(_run "$CHECKOUT_CMD")"
+        local CHECKOUT_CMD="mkdir -p "$TARGET"; git --work-tree="$TARGET" --git-dir="$GIT_DIR" checkout -f "$BRANCH""
+        local RESULT="$(_run "$CHECKOUT_CMD")"
         echo "$RESULT"
 }
 
@@ -74,6 +74,7 @@ deploy() {
                 exit 1
         fi
 
+        local DEPLOY_CMD
         if [[ -z "$ENV_FILE" ]];
         then
                 DEPLOY_CMD="cd "$TARGET"; docker compose up $PARAMS"
@@ -81,7 +82,7 @@ deploy() {
                 DEPLOY_CMD="cd "$TARGET"; docker compose --env-file "$ENV_FILE" up $PARAMS"
         fi
         
-        RESULT="$(_run "$DEPLOY_CMD")"
+        local RESULT="$(_run "$DEPLOY_CMD")"
         echo "$RESULT"
 }
 
@@ -94,7 +95,7 @@ branch() {
                 exit 1
         fi
         
-        RAW_BRANCH="${BRANCH_LOCATION#$DEPLOY_BRANCHES_DIR}"
+        local RAW_BRANCH="${BRANCH_LOCATION#$DEPLOY_BRANCHES_DIR}"
         
         if [[ $RAW_BRANCH == /* ]];
         then
