@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "../src/gsl-source"
+source "../src/gsl-deployment-import"
 
 test_branch_SimpleBranchName_ReturnsExpected() {
     local RESULT="$(branch /var/myrepo/.gitserverlite/deploy_records/main /var/myrepo/.gitserverlite/deploy_records)"

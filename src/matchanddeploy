@@ -19,7 +19,7 @@ GIT_DIR=$2
 SOURCE_DIR=".gitserverlite"
 
 source "$SOURCE_DIR/env"
-source "$SOURCE_DIR/gsl-source"
+source "$SOURCE_DIR/gsl-deployment-import"
 
 DEPLOY_BRANCHES_DIR="$GIT_DIR/$SOURCE_DIR/deploy_branches"
 BRANCHES=($DEPLOY_BRANCHES_DIR/*)

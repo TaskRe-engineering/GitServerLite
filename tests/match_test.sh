@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "../src/gsl-source"
+source "../src/gsl-deployment-import"
 
 branch() {
     echo $1
