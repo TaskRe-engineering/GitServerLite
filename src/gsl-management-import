@@ -1,0 +1,140 @@
+#!/bin/bash
+
+#for debugging
+#set -ex
+
+#
+# Copyright © 2023 Task Re-engineering Inc.
+# All rights reserved.
+# 
+# This source code is licensed under the [] license found in the
+# LICENSE file in the root directory of this source tree. 
+#
+
+SOURCE_DIR=".gitserverlite"
+source "$SOURCE_DIR/gsl-deployment-import"
+
+log() {
+    echo -e $1
+}
+
+invalid() {
+    echo "Invalid: $1"
+    echo ""
+    display_manual
+    exit 1
+}
+
+error() {
+    echo -e "Error: $1"
+    exit 1
+}
+
+display_manual() {
+    [ "$*" ] && echo "$0: $*"
+    sed -n '/^##/,/^$/s/^## \{0,1\}//p' "$0"
+}
+
+add_branch() {
+    BRANCH_NAME="$1"
+
+    if [[ -z "$BRANCH_NAME" ]];
+    then
+        invalid "branch name is required."
+    fi
+
+    if [[ "$BRANCH_NAME" =~ [^a-zA-Z0-9] ]];
+    then
+        invalid "branch name must be alphanumeric."
+    fi
+    
+    echo "Enter the .env file name: (optional)"
+    read -e ENV_FILE
+
+    _create_branch_file "$BRANCH_NAME" "$ENV_FILE"
+
+    log "Deploy record for branch \"$BRANCH_NAME\" successfully created."
+}
+
+remove_branch() {
+    BRANCH_NAME="$1"
+
+    if [[ -z "$BRANCH_NAME" ]];
+    then
+        invalid "branch name is required."
+    fi
+
+    FILE="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
+
+    if [[ ! -f "$FILE" ]];
+    then
+        error "deploy record for branch \"$BRANCH_NAME\" not found."
+    fi
+
+    _remove_branch_file "$FILE"
+    log "Deploy record for branch $BRANCH_NAME successfully removed."
+}
+
+list() {
+    BRANCHES="$1"
+    DEPLOY_BRANCHES_DIR="$2"
+
+    if [[ ${#BRANCHES[@]} == 0 ]];
+    then
+        echo "There are no deploy branch records configured."
+    fi
+
+    for BRANCH_LOCATION in "${BRANCHES[@]}"
+    do
+        echo "$(branch "$BRANCH_LOCATION" "$DEPLOY_BRANCHES_DIR")"
+    done
+}
+
+show_branch() {
+    BRANCH_NAME="$1"
+
+    if [[ -z "$BRANCH_NAME" ]];
+    then
+        invalid "branch name is required."
+    fi
+
+    BRANCH="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
+
+    if [[ ! -f "$BRANCH" ]];
+    then
+        error "deploy record for branch \"$BRANCH_NAME\" not found."
+    fi
+
+    echo -e "Displaying record for deploy branch $BRANCH_NAME:"
+    echo "==== START ===="
+    cat "$BRANCH"
+    echo -e "===== END =====\n"
+}
+
+show_deploy_directory() {
+    echo "$DEPLOY_DIR/"
+}
+
+show_version() {
+    echo "gitserverlite version $VERSION"
+}
+
+_remove_branch_file() {
+    BRANCH_NAME="$1"
+
+    rm "$FILE"
+}
+
+_create_branch_file() {
+    BRANCH_NAME="$1"
+    ENV_FILE="$2"
+
+    FILE="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
+
+    echo -e "# Deploy branch record for branch \"$BRANCH_NAME\"" > "$FILE"
+    
+    if [[ ! -z "$ENV_FILE" ]];
+    then
+        echo "ENV_FILE=$ENV_FILE" >> "$FILE"
+    fi
+}
