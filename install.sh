@@ -94,6 +94,9 @@ mkdir -p "$MAIN_DIR"
 VERSION=$(git describe --tags)
 echo -e "VERSION=\"$VERSION\"" > "$MAIN_DIR/version"
 
+cp -f "src/gsl-branch" "$MAIN_DIR/"
+chmod a+x "$MAIN_DIR/gsl-branch"
+
 cp -f "src/gsl-management-import" "$MAIN_DIR/"
 chmod a+x "$MAIN_DIR/gsl-management-import"
 

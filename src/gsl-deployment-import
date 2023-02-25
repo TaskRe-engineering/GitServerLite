@@ -86,25 +86,6 @@ deploy() {
         echo "$RESULT"
 }
 
-branch() {
-        BRANCH_LOCATION="$1"
-        DEPLOY_BRANCHES_DIR="$2"
-        
-        if [[ -z "$BRANCH_LOCATION" ]];
-        then
-                exit 1
-        fi
-        
-        local RAW_BRANCH="${BRANCH_LOCATION#$DEPLOY_BRANCHES_DIR}"
-        
-        if [[ $RAW_BRANCH == /* ]];
-        then
-                echo "${RAW_BRANCH:1}"
-        else
-                echo "$RAW_BRANCH"
-        fi
-}
-
 load() {
         BRANCH_LOCATION="$1"
 

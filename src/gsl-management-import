@@ -12,6 +12,7 @@
 #
 
 SOURCE_DIR=".gitserverlite"
+source "$SOURCE_DIR/gsl-branch"
 source "$SOURCE_DIR/gsl-deployment-import"
 
 log() {
@@ -43,7 +44,9 @@ add_branch() {
         invalid "branch name is required."
     fi
 
-    if [[ "$BRANCH_NAME" =~ [^a-zA-Z0-9] ]];
+    (validate_branch_name "$BRANCH_NAME")
+    local exit_status=$?
+    if [[ exit_status -ne 0 ]];
     then
         invalid "branch name must be alphanumeric."
     fi

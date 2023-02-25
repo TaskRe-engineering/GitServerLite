@@ -13,11 +13,12 @@
 
 shopt -s nullglob
 
-ref=$1
-GIT_DIR=$2
+ref="$1"
+GIT_DIR="$2"
 
 SOURCE_DIR=".gitserverlite"
 source "$SOURCE_DIR/env"
+source "$SOURCE_DIR/gsl-branch"
 source "$SOURCE_DIR/gsl-deployment-import"
 
 DEPLOY_BRANCHES_DIR="$GIT_DIR/$SOURCE_DIR/deploy_branches"
@@ -25,15 +26,15 @@ BRANCHES=("$DEPLOY_BRANCHES_DIR"/*)
 
 PARAMS="--build --detach"
 
-MATCH="$(match $ref $BRANCHES)"
+MATCH="$(match "$ref" "$BRANCHES")"
 if [[ ! -z "$MATCH" ]];
 then
         echo "Ref $ref received. Matches branch configured to automatically deploy."
 
-        load $MATCH
-        BRANCH="$(branch $MATCH $DEPLOY_BRANCHES_DIR)"
+        load "$MATCH"
+        BRANCH="$(branch "$MATCH" "$DEPLOY_BRANCHES_DIR")"
         
-        process $GIT_DIR $DEPLOY_DIR $PARAMS $BRANCH $ENV_FILE
+        process "$GIT_DIR" "$DEPLOY_DIR" "$PARAMS" "$BRANCH" "$ENV_FILE"
 else
         echo "Ref $ref received. Doing nothing: does not match branches configured to automatically deploy."
 fi
