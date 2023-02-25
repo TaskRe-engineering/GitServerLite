@@ -11,24 +11,14 @@
 # LICENSE file in the root directory of this source tree. 
 #
 
-SOURCE_DIR=".gitserverlite"
-source "$SOURCE_DIR/gsl-branch"
-source "$SOURCE_DIR/gsl-deployment-import"
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-log() {
-    echo -e $1
-}
+source "$SCRIPT_DIR/gsl-eval"
+source "$SCRIPT_DIR/gsl-branch"
 
-invalid() {
-    echo "Invalid: $1"
-    echo ""
+print_invalid_command() {
+    echo -e "Invalid: invalid command.\n"
     display_manual
-    exit 1
-}
-
-error() {
-    echo -e "Error: $1"
-    exit 1
 }
 
 display_manual() {
@@ -41,22 +31,17 @@ add_branch() {
 
     if [[ -z "$BRANCH_NAME" ]];
     then
-        invalid "branch name is required."
+        exit 1
     fi
 
-    (validate_branch_name "$BRANCH_NAME")
-    local exit_status=$?
-    if [[ exit_status -ne 0 ]];
-    then
-        invalid "branch name must be alphanumeric."
-    fi
+    validate_branch_name "$BRANCH_NAME"
     
     echo "Enter the .env file name: (optional)"
     read -e ENV_FILE
 
     _create_branch_file "$BRANCH_NAME" "$ENV_FILE"
 
-    log "Deploy record for branch \"$BRANCH_NAME\" successfully created."
+    echo "Deploy record for branch \"$BRANCH_NAME\" successfully created."
 }
 
 remove_branch() {
@@ -64,18 +49,18 @@ remove_branch() {
 
     if [[ -z "$BRANCH_NAME" ]];
     then
-        invalid "branch name is required."
+        exit 1
     fi
 
     FILE="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
 
     if [[ ! -f "$FILE" ]];
     then
-        error "deploy record for branch \"$BRANCH_NAME\" not found."
+        exit 1
     fi
 
     _remove_branch_file "$FILE"
-    log "Deploy record for branch $BRANCH_NAME successfully removed."
+    echo "Deploy record for branch $BRANCH_NAME successfully removed."
 }
 
 list() {
@@ -94,23 +79,23 @@ list() {
 }
 
 show_branch() {
-    BRANCH_NAME="$1"
+    local branch_name="$1"
 
-    if [[ -z "$BRANCH_NAME" ]];
+    if [[ -z "$branch_name" ]];
     then
-        invalid "branch name is required."
+        exit 1
     fi
 
-    BRANCH="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
+    local branch_location="$DEPLOY_BRANCHES_DIR/$branch_name"
 
-    if [[ ! -f "$BRANCH" ]];
+    if [[ ! -f "$branch_location" ]];
     then
-        error "deploy record for branch \"$BRANCH_NAME\" not found."
+        exit 1
     fi
 
-    echo -e "Displaying record for deploy branch $BRANCH_NAME:"
+    echo -e "Displaying record for deploy branch $branch_name:"
     echo "==== START ===="
-    cat "$BRANCH"
+    cat "$branch_location"
     echo -e "===== END =====\n"
 }
 
@@ -120,6 +105,41 @@ show_deploy_directory() {
 
 show_version() {
     echo "gitserverlite version $VERSION"
+}
+
+run_selection() {
+    command="$1"
+    argument1="$2"
+
+    if [[ -z "$command" ]];
+    then
+        exit 1
+    fi
+
+    if [[ "$command" = "help" ]];
+    then
+        display_manual
+    elif [ "$command" = "add-branch" ];
+    then
+        add_branch $argument1
+    elif [ "$command" = "remove-branch" ];
+    then
+        remove_branch $argument1
+    elif [ "$command" = "list" ];
+    then
+        list "$BRANCHES" "$DEPLOY_BRANCHES_DIR"
+    elif [ "$command" = "show-branch" ];
+    then
+        show_branch $argument1
+    elif [ "$command" = "show-deploy-location" ];
+    then
+        show_deploy_directory
+    elif [ "$command" = "version" ];
+    then
+        show_version
+    else
+        exit 1
+    fi
 }
 
 _remove_branch_file() {

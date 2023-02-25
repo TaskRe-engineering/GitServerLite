@@ -13,6 +13,13 @@
 
 DESTINATION=$1
 
+copy_source_file() {
+    source_file_name="$1"
+    
+    cp -f "src/$source_file_name" "$MAIN_DIR/"
+    chmod a+x "$MAIN_DIR/$source_file_name"
+}
+
 git fetch --tags
 
 if [[ -z $DESTINATION ]];
@@ -94,17 +101,11 @@ mkdir -p "$MAIN_DIR"
 VERSION=$(git describe --tags)
 echo -e "VERSION=\"$VERSION\"" > "$MAIN_DIR/version"
 
-cp -f "src/gsl-branch" "$MAIN_DIR/"
-chmod a+x "$MAIN_DIR/gsl-branch"
-
-cp -f "src/gsl-management-import" "$MAIN_DIR/"
-chmod a+x "$MAIN_DIR/gsl-management-import"
-
-cp -f "src/gsl-deployment-import" "$MAIN_DIR/"
-chmod a+x "$MAIN_DIR/gsl-deployment-import"
-
-cp -f "src/matchanddeploy" "$MAIN_DIR/"
-chmod a+x "$MAIN_DIR/matchanddeploy"
+copy_source_file "gsl-branch"
+copy_source_file "gsl-eval"
+copy_source_file "gsl-management-import"
+copy_source_file "gsl-deployment-import"
+copy_source_file "matchanddeploy"
 
 if [[ -z $DEPLOY_DIR ]];
 then

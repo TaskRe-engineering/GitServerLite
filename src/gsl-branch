@@ -11,6 +11,10 @@
 # LICENSE file in the root directory of this source tree. 
 #
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+source "$SCRIPT_DIR/gsl-eval"
+
 branch() {
         branch_location="$1"
         deploy_branches_dir="$2"

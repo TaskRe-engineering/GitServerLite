@@ -32,35 +32,12 @@ source "$SOURCE_DIR/env"
 DEPLOY_BRANCHES_DIR="$SOURCE_DIR/deploy_branches"
 BRANCHES=("$DEPLOY_BRANCHES_DIR"/*)
 
-COMMAND=$1
-ARGUMENT1=$2
+command="$1"
+argument1="$2"
 
-if [[ -z "$COMMAND" ]];
+(run_selection "$command" "$argument1")
+exit_status=$?
+if [[ $exit_status -ne 0 ]];
 then
-    invalid "command required."
-fi
-
-if [[ "$COMMAND" = "help" ]];
-then
-    display_manual
-elif [ "$COMMAND" = "add-branch" ];
-then
-    add_branch $ARGUMENT1
-elif [ "$COMMAND" = "remove-branch" ];
-then
-    remove_branch $ARGUMENT1
-elif [ "$COMMAND" = "list" ];
-then
-    list "$BRANCHES" "$DEPLOY_BRANCHES_DIR"
-elif [ "$COMMAND" = "show-branch" ];
-then
-    show_branch $ARGUMENT1
-elif [ "$COMMAND" = "show-deploy-location" ];
-then
-    show_deploy_directory
-elif [ "$COMMAND" = "version" ];
-then
-    show_version
-else
-    invalid "unknown command \"$COMMAND\"."
+    print_invalid_command
 fi
