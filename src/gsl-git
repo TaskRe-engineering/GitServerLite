@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#for debugging
+#set -ex
+
+#
+# Copyright © 2023 Task Re-engineering Inc.
+# All rights reserved.
+# 
+# This source code is licensed under the [] license found in the
+# LICENSE file in the root directory of this source tree. 
+#
+
+checkout() {
+        GIT_DIR="$1"
+        BRANCH="$2"
+        TARGET="$3"
+
+        if [[ -z "$GIT_DIR" || -z "$BRANCH" || -z "$TARGET" ]];
+        then
+                exit 1
+        fi
+        
+        local CHECKOUT_CMD="mkdir -p "$TARGET"; git --work-tree="$TARGET" --git-dir="$GIT_DIR" checkout -f "$BRANCH""
+        local RESULT="$(_run "$CHECKOUT_CMD")"
+        echo "$RESULT"
+}

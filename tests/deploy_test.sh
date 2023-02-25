@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "../src/gsl-deployment-import"
+source "../src/gsl-deploy"
 
 _run() {
         COMMAND="$1"

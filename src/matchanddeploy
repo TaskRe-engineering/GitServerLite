@@ -17,9 +17,11 @@ ref="$1"
 GIT_DIR="$2"
 
 SOURCE_DIR=".gitserverlite"
+
 source "$SOURCE_DIR/env"
 source "$SOURCE_DIR/gsl-branch"
-source "$SOURCE_DIR/gsl-deployment-import"
+source "$SOURCE_DIR/gsl-file"
+source "$SOURCE_DIR/gsl-deploy"
 
 DEPLOY_BRANCHES_DIR="$GIT_DIR/$SOURCE_DIR/deploy_branches"
 BRANCHES=("$DEPLOY_BRANCHES_DIR"/*)
@@ -31,7 +33,7 @@ if [[ ! -z "$MATCH" ]];
 then
         echo "Ref $ref received. Matches branch configured to automatically deploy."
 
-        load "$MATCH"
+        load_branch_file "$MATCH"
         BRANCH="$(branch "$MATCH" "$DEPLOY_BRANCHES_DIR")"
         
         process "$GIT_DIR" "$DEPLOY_DIR" "$PARAMS" "$BRANCH" "$ENV_FILE"

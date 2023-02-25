@@ -25,9 +25,11 @@
 shopt -s nullglob
 
 SOURCE_DIR=".gitserverlite"
-source "$SOURCE_DIR/gsl-management-import"
-source "$SOURCE_DIR/version"
+
 source "$SOURCE_DIR/env"
+source "$SOURCE_DIR/gsl-io"
+source "$SOURCE_DIR/gsl-manage"
+source "$SOURCE_DIR/version"
 
 DEPLOY_BRANCHES_DIR="$SOURCE_DIR/deploy_branches"
 BRANCHES=("$DEPLOY_BRANCHES_DIR"/*)

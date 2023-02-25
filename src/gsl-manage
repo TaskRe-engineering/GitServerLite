@@ -14,12 +14,8 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 source "$SCRIPT_DIR/gsl-eval"
+source "$SCRIPT_DIR/gsl-file"
 source "$SCRIPT_DIR/gsl-branch"
-
-print_invalid_command() {
-    echo -e "Invalid: invalid command.\n"
-    display_manual
-}
 
 display_manual() {
     [ "$*" ] && echo "$0: $*"
@@ -139,25 +135,5 @@ run_selection() {
         show_version
     else
         exit 1
-    fi
-}
-
-_remove_branch_file() {
-    BRANCH_NAME="$1"
-
-    rm "$FILE"
-}
-
-_create_branch_file() {
-    BRANCH_NAME="$1"
-    ENV_FILE="$2"
-
-    FILE="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
-
-    echo -e "# Deploy branch record for branch \"$BRANCH_NAME\"" > "$FILE"
-    
-    if [[ ! -z "$ENV_FILE" ]];
-    then
-        echo "ENV_FILE=$ENV_FILE" >> "$FILE"
     fi
 }

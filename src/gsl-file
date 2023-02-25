@@ -1,0 +1,38 @@
+#!/bin/bash
+
+#for debugging
+#set -ex
+
+#
+# Copyright © 2023 Task Re-engineering Inc.
+# All rights reserved.
+# 
+# This source code is licensed under the [] license found in the
+# LICENSE file in the root directory of this source tree. 
+#
+
+create_branch_file() {
+    BRANCH_NAME="$1"
+    ENV_FILE="$2"
+
+    FILE="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
+
+    echo -e "# Deploy branch record for branch \"$BRANCH_NAME\"" > "$FILE"
+    
+    if [[ ! -z "$ENV_FILE" ]];
+    then
+        echo "ENV_FILE=$ENV_FILE" >> "$FILE"
+    fi
+}
+
+remove_branch_file() {
+    BRANCH_NAME="$1"
+
+    rm "$FILE"
+}
+
+load_branch_file() {
+        BRANCH_LOCATION="$1"
+
+        source "$BRANCH_LOCATION"
+}

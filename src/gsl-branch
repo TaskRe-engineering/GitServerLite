@@ -34,6 +34,25 @@ branch() {
         fi
 }
 
+match() {
+        ref="$1"
+        branches="$2"
+
+        local match=""
+
+        for branch_location in "${branches[@]}"
+        do
+                local branch="$(branch $branch_location)"
+
+                if [[ "$ref" = "refs/heads/$branch" ]];
+                then
+                        match="$branch_location"
+                fi
+        done
+
+        echo "$match"
+}
+
 validate_branch_name() {
     branch_name="$1"
 
