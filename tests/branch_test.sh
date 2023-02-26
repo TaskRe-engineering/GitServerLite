@@ -2,6 +2,8 @@
 
 source "../src/gsl-branch"
 
+# Tests
+
 test_branch_SimpleBranchName_ReturnsExpected() {
     local RESULT="$(branch /var/myrepo/.gitserverlite/deploy_records/main /var/myrepo/.gitserverlite/deploy_records)"
     assertEquals "main" "$RESULT"

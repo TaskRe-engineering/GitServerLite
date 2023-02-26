@@ -2,9 +2,13 @@
 
 source "../src/gsl-branch"
 
+# Mocks and Stubs
+
 branch() {
-    echo $1
+    echo "$1"
 }
+
+# Tests
 
 test_match_BranchNameMatchingRef_ReturnsExpected() {
     local BRANCHES=("main" "develop" "prototype" "test")

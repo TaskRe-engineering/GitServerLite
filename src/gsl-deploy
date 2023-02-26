@@ -17,42 +17,39 @@ source "$SCRIPT_DIR/gsl-eval"
 source "$SCRIPT_DIR/gsl-git"
 
 process() {
-        local git_dir="$1"
-        local deploy_dir="$2"
-        local params="$3"
-        local branch="$4"
-        local env_file="$5"
+    local git_dir="$1"
+    local deploy_dir="$2"
+    local params="$3"
+    local branch="$4"
+    local env_file="$5"
 
-        if [[ -z "$git_dir" || -z "$deploy_dir" || -z "$params" || -z "$branch" ]];
-        then
-                exit 1
-        fi
-        
-        local target="$deploy_dir/deploy_$branch"
-        local gsl_command="checkout "$git_dir" "$branch" "$target"; deploy "$target" \""$params"\" "$env_file""
-
-        local result="$(_run "$gsl_command")"
-        echo "$result"
+    if [[ -z "$git_dir" || -z "$deploy_dir" || -z "$params" || -z "$branch" ]];
+    then
+        exit 1
+    fi
+    
+    local target="$deploy_dir/deploy_$branch"
+    local run_command="checkout "$git_dir" "$branch" "$target"; deploy "$target" \""$params"\" "$env_file""
+    _run "$run_command"
 }
 
 deploy() {
-        local target="$1"
-        local params="$2"
-        local env_file="$3"
+    local target="$1"
+    local params="$2"
+    local env_file="$3"
 
-        if [[ -z "$target" || -z "$params" ]];
-        then
-                exit 1
-        fi
+    if [[ -z "$target" || -z "$params" ]];
+    then
+        exit 1
+    fi
 
-        local gsl_command
-        if [[ -z "$env_file" ]];
-        then
-                gsl_command="cd "$target"; docker compose up $params"
-        else
-                gsl_command="cd "$target"; docker compose --env-file "$env_file" up $params"
-        fi
-        
-        local result="$(_run "$gsl_command")"
-        echo "$result"
+    local run_command
+    if [[ -z "$env_file" ]];
+    then
+        run_command="cd "$target"; docker compose up $params"
+    else
+        run_command="cd "$target"; docker compose --env-file "$env_file" up $params"
+    fi
+    
+    _run "$run_command"
 }

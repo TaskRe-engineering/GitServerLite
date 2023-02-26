@@ -21,7 +21,6 @@ checkout() {
         exit 1
     fi
     
-    local command="mkdir -p "$target"; git --work-tree="$target" --git-dir="$git_dir" checkout -f "$branch""
-    local result="$(_run "$command")"
-    echo "$result"
+    local run_command="mkdir -p "$target"; git --work-tree="$target" --git-dir="$git_dir" checkout -f "$branch""
+    _run "$run_command"
 }

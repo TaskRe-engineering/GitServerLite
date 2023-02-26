@@ -2,16 +2,26 @@
 
 source "../src/gsl-deploy"
 
-_run() {
-    COMMAND="$1"
+# Mocks and Stubs
 
-    if [[ -z "$COMMAND" ]];
+_run() {
+    local command="$1"
+
+    if [[ -z "$command" ]];
     then
-            exit 1
+        exit 1
     fi
 
-    echo "$COMMAND"
+    GSL_LAST_RUN="$command"
 }
+
+# SetUp and tearDown
+
+setUp() {
+    GSL_LAST_RUN=""
+}
+
+# Tests
 
 test_process_NoGitDir_ExpectedExitStatus() {
     (process)
@@ -34,13 +44,13 @@ test_process_NoBranch_ExpectedExitStatus() {
 }
 
 test_process_NoEnvFile_ReturnsExpected() {
-    RESULT="$(process /var/git/my_repo.git /var/deploy "--build --deploy" main)"
-    assertEquals "checkout /var/git/my_repo.git main /var/deploy/deploy_main; deploy /var/deploy/deploy_main \"--build --deploy\" " "$RESULT"
+    process /var/git/my_repo.git /var/deploy "--build --deploy" main
+    assertEquals "checkout /var/git/my_repo.git main /var/deploy/deploy_main; deploy /var/deploy/deploy_main \"--build --deploy\" " "$GSL_LAST_RUN"
 }
 
 test_process_ValidEnvFile_ReturnsExpected() {
-    RESULT="$(process /var/git/my_repo.git /var/deploy "--build --deploy" main .env.dev)"
-    assertEquals "checkout /var/git/my_repo.git main /var/deploy/deploy_main; deploy /var/deploy/deploy_main \"--build --deploy\" .env.dev" "$RESULT"
+    process /var/git/my_repo.git /var/deploy "--build --deploy" main .env.dev
+    assertEquals "checkout /var/git/my_repo.git main /var/deploy/deploy_main; deploy /var/deploy/deploy_main \"--build --deploy\" .env.dev" "$GSL_LAST_RUN"
 }
 
 # Load shUnit2.

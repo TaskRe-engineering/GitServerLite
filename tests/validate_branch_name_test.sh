@@ -2,6 +2,8 @@
 
 source "../src/gsl-branch"
 
+# Tests
+
 test_validate_branch_name_SpaceInName_ExpectedExit() {
     BRANCH="main main"
     (validate_branch_name "$BRANCH")

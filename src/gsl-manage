@@ -33,11 +33,10 @@ add_branch() {
     validate_branch_name "$branch_name"
     
     echo "Enter the .env file name: (optional)"
-    read -e ENV_FILE
+    read -e env_file
 
-    local cmd="create_branch_file "$branch_name" "$ENV_FILE""
-    local result="$(_run "$cmd")"
-    echo "$result"
+    local run_command="create_branch_file "$branch_name" "$env_file""
+    _run "$run_command"
 }
 
 remove_branch() {
@@ -55,9 +54,8 @@ remove_branch() {
         exit 1
     fi
 
-    local cmd="remove_branch_file "$file""
-    local result="$(_run "$cmd")"
-    echo "$result"
+    local run_command="remove_branch_file "$file""
+    _run "$run_command"
 }
 
 list() {
