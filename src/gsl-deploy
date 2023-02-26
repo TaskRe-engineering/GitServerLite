@@ -46,8 +46,10 @@ deploy() {
     local run_command
     if [[ -z "$env_file" ]];
     then
+        echo "Running Docker compose up. No environment file specified, so .env will be used if it exists."
         run_command="cd "$target"; docker compose up $params"
     else
+        echo "Running Docker compose up with environment file \""$env_file"\"."
         run_command="cd "$target"; docker compose --env-file "$env_file" up $params"
     fi
     
