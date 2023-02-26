@@ -117,7 +117,16 @@ then
     echo -e "GSL_DEPLOY_DIR=\"deploy\"" >> "$MAIN_DIR/env"
     echo "Deploy location set to: \"deploy/\"."
 else
-    echo -e "Existing deploy location \"$GSL_DEPLOY_DIR/\" used."
+    echo -e "Existing deploy location \""$GSL_DEPLOY_DIR"/\" used."
+fi
+
+if [[ -z "$GSL_DOCKER_COMPOSE_UP_PARAMS" ]];
+then
+    GSL_DOCKER_COMPOSE_UP_PARAMS="--build --detach"
+    echo -e "GSL_DOCKER_COMPOSE_UP_PARAMS=\"$GSL_DOCKER_COMPOSE_UP_PARAMS\"" >> "$MAIN_DIR/env"
+    echo "Docker compose up parameters set to: \""$GSL_DOCKER_COMPOSE_UP_PARAMS"\"."
+else
+    echo -e "Existing docker compose up parameters \""$GSL_DOCKER_COMPOSE_UP_PARAMS"\" used."
 fi
 
 GSL_DEPLOY_BRANCHES_DIR="$MAIN_DIR/deploy_branches"

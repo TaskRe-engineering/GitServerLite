@@ -26,8 +26,6 @@ source "$GSL_DIR/gsl-deploy"
 GSL_DEPLOY_BRANCHES_DIR="$GSL_DIR/deploy_branches"
 get_branches
 
-GSL_PARAMS="--build --detach"
-
 match="$(match "$ref")"
 if [[ ! -z "$match" ]];
 then
@@ -36,7 +34,7 @@ then
     load_branch_file "$match"
     branch="$(branch "$match")"
     
-    process "$GIT_DIR" "$GSL_DEPLOY_DIR" "$GSL_PARAMS" "$branch" "$ENV_FILE"
+    process "$GIT_DIR" "$GSL_DEPLOY_DIR" "$GSL_DOCKER_COMPOSE_UP_PARAMS" "$branch" "$ENV_FILE"
 else
     echo "Ref $ref received. Doing nothing: does not match branches configured to automatically deploy."
 fi
