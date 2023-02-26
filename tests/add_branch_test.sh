@@ -21,7 +21,7 @@
 # Mocks and Stubs
 
 _run() {
-    local command="$1"
+    command="$1"
 
     if [[ -z "$command" ]];
     then
