@@ -34,7 +34,7 @@ then
     load_branch_file "$match"
     branch="$(branch "$match")"
     
-    process "$GIT_DIR" "$GSL_DEPLOY_DIR" "$GSL_DOCKER_COMPOSE_UP_PARAMS" "$branch" "$ENV_FILE"
+    process "$GIT_DIR" "$GSL_DEPLOY_DIR" "$GSL_DOCKER_COMPOSE_UP_PARAMS" "$branch" "$env_file"
 else
     echo "Ref $ref received. Doing nothing: does not match branches configured to automatically deploy."
 fi

@@ -25,7 +25,9 @@ create_branch_file() {
     
     if [[ ! -z "$env_file" ]];
     then
-        echo "ENV_FILE=$env_file" >> "$file"
+        echo "env_file=$env_file" >> "$file"
+    else
+        echo -e "# No env-file specified. \".env\" will be used if it exists, otherwise none will be used." >> "$file"
     fi
 
     echo "Deploy record for branch \"$branch_name\" successfully created."
