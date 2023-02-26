@@ -16,6 +16,18 @@
 # limitations under the License.
 # 
 
+# 
+# GitServerLite - A lightweight set of scripts to set up and manage a Git repository
+#                 that automatically deploys your Dockerized services for you.
+#                 https://github.com/TaskRe-engineering/GitServerLite
+# 
+# File: run_selection_test.sh
+# Author: Kier von Konigslow
+# Created: February 25, 2023
+# 
+# This script contains unit tests for the run_selection function.
+# 
+
 . "../src/gsl-source"
 
 # Mocks and Stubs

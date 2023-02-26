@@ -16,6 +16,18 @@
 # limitations under the License.
 # 
 
+# 
+# GitServerLite - A lightweight set of scripts to set up and manage a Git repository
+#                 that automatically deploys your Dockerized services for you.
+#                 https://github.com/TaskRe-engineering/GitServerLite
+# 
+# File: remove_branch_test.sh
+# Author: Kier von Konigslow
+# Created: February 25, 2023
+# 
+# This script contains unit tests for the remove_branch function.
+# 
+
 . "../src/gsl-source"
 
 # Mocks and Stubs

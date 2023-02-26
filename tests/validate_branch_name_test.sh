@@ -16,6 +16,18 @@
 # limitations under the License.
 # 
 
+# 
+# GitServerLite - A lightweight set of scripts to set up and manage a Git repository
+#                 that automatically deploys your Dockerized services for you.
+#                 https://github.com/TaskRe-engineering/GitServerLite
+# 
+# File: validate_branch_name_test.sh
+# Author: Kier von Konigslow
+# Created: February 24, 2023
+# 
+# This script contains unit tests for the validate_branch_name function.
+# 
+
 . "../src/gsl-source"
 
 # Tests
