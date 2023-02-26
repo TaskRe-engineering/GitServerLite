@@ -22,7 +22,7 @@
 DESTINATION="$1"
 
 copy_source_file() {
-    local source_file_name="$1"
+    source_file_name="$1"
     
     cp -f "src/$source_file_name" "$MAIN_DIR/"
     chmod a+x "$MAIN_DIR/$source_file_name"
