@@ -21,7 +21,7 @@
 # Mocks and Stubs
 
 branch() {
-    echo "$1"
+    printf "$1"
 }
 
 # SetUp and tearDown

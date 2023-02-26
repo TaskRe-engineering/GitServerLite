@@ -35,12 +35,12 @@ get_branches
 match="$(match "$ref")"
 if [[ ! -z "$match" ]];
 then
-    echo "Ref $ref received. Matches branch configured to automatically deploy."
+    printf "Ref \"%s\" received. Matches branch configured to automatically deploy.\n" "$ref"
 
     load_branch_file "$match"
     branch="$(branch "$match")"
     
     process "$GIT_DIR" "$GSL_DEPLOY_DIR" "$GSL_DOCKER_COMPOSE_UP_PARAMS" "$branch" "$env_file"
 else
-    echo "Ref $ref received. Doing nothing: does not match branches configured to automatically deploy."
+    printf "Ref \"%s\" received. Doing nothing: does not match branches configured to automatically deploy.\n" "$ref"
 fi

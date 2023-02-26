@@ -31,9 +31,9 @@ branch() {
 
     if [[ $raw_branch == /* ]];
     then
-        echo "${raw_branch:1}"
+        printf "${raw_branch:1}"
     else
-        echo "$raw_branch"
+        printf "$raw_branch"
     fi
 }
 
@@ -52,7 +52,7 @@ match() {
         fi
     done
 
-    echo "$match"
+    printf "$match"
 }
 
 validate_branch_name() {
@@ -93,10 +93,10 @@ deploy() {
 
     if [[ -z "$env_file" ]];
     then
-        echo "Running Docker compose up. No environment file specified, so .env will be used if it exists."
+        printf "Running Docker compose up. No environment file specified, so \".env\" will be used if it exists.\n"
         run_command="cd "$target"; docker compose up $params"
     else
-        echo "Running Docker compose up with environment file \""$env_file"\"."
+        printf "Running Docker compose up with environment file \"%s\".\n" "$env_file"
         run_command="cd "$target"; docker compose --env-file "$env_file" up $params"
     fi
     
@@ -113,16 +113,16 @@ create_branch_file() {
 
     file="$GSL_DEPLOY_BRANCHES_DIR/$branch_name"
 
-    echo -e "# Deploy branch record for branch \"$branch_name\"" > "$file"
+    printf "# Deploy branch record for branch \"%s\"\n" "$branch_name" > "$file"
     
     if [[ ! -z "$env_file" ]];
     then
-        echo "env_file=$env_file" >> "$file"
+        printf "env_file=%s\n" "$env_file" >> "$file"
     else
-        echo -e "# No env-file specified. \".env\" will be used if it exists, otherwise none will be used." >> "$file"
+        printf "# No env-file specified. \".env\" will be used if it exists, otherwise none will be used.\n" >> "$file"
     fi
 
-    echo "Deploy record for branch \"$branch_name\" successfully created."
+    printf "Deploy record for branch \"%s\" successfully created.\n" "$branch_name"
 }
 
 remove_branch_file() {
@@ -135,7 +135,7 @@ remove_branch_file() {
 
     rm -f "$file"
 
-    echo "Deploy record for branch $branch_name successfully removed."
+    printf "Deploy record for branch \"%s\" successfully removed.\n" "$branch_name"
 }
 
 load_branch_file() {
@@ -159,7 +159,7 @@ checkout() {
 }
 
 print_invalid_command() {
-    echo -e "Invalid: invalid command.\n"
+    printf "Invalid: invalid command.\n"
     display_manual
 }
 
@@ -170,10 +170,10 @@ handle_exit() {
     then
         if [[ $exit_status -eq 64 ]];
         then
-            echo "Error: branch name must be alphanumeric."
+            printf "Error: branch name must be alphanumeric.\n"
         elif [[ $exit_status -eq 65 ]];
         then
-            echo "Error: branch not found."
+            printf "Error: branch not found.\n"
         else
             print_invalid_command
         fi
@@ -181,7 +181,7 @@ handle_exit() {
 }
 
 display_manual() {
-    [ "$*" ] && echo "$0: $*"
+    [ "$*" ] && printf "$0: $*"
     sed -n '/^##/,/^$/s/^## \{0,1\}//p' "$0"
 }
 
@@ -195,7 +195,7 @@ add_branch() {
 
     validate_branch_name "$branch_name"
     
-    echo "Enter the .env file name: (optional)"
+    printf "Enter the .env file name: (optional)\n"
     read -e env_file
 
     run_command="create_branch_file "$branch_name" "$env_file""
@@ -219,12 +219,12 @@ remove_branch() {
 list() {
     if [[ ${#GSL_BRANCHES[@]} == 0 ]];
     then
-        echo "There are no deploy branch records configured."
+        printf "There are no deploy branch records configured.\n"
     fi
 
     for branch_location in "${GSL_BRANCHES[@]}"
     do
-        echo "$(branch "$branch_location" "$GSL_DEPLOY_BRANCHES_DIR")"
+        printf "$(branch "$branch_location" "$GSL_DEPLOY_BRANCHES_DIR")\n"
     done
 }
 
@@ -243,18 +243,18 @@ show_branch() {
         exit 65
     fi
 
-    echo -e "Displaying record for deploy branch $branch_name:"
-    echo "==== START ===="
+    printf "Displaying record for deploy branch \"%s\":\n" "$branch_name"
+    printf "==== START ====\n"
     cat "$branch_location"
-    echo -e "===== END =====\n"
+    printf "===== END =====\n\n"
 }
 
 show_deploy_directory() {
-    echo "$GSL_DEPLOY_DIR/"
+    printf "%s/\n" "$GSL_DEPLOY_DIR"
 }
 
 show_version() {
-    echo "gitserverlite version $GSL_VERSION"
+    printf "gitserverlite version %s\n" "$GSL_VERSION"
 }
 
 run_selection() {

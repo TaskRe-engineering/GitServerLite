@@ -32,27 +32,27 @@ git fetch --tags
 
 if [[ -z "$DESTINATION" ]];
 then
-    echo "Error: desination is required."
+    printf "Error: desination is required.\n"
     exit 1
 fi
 
 git -C "$DESTINATION" rev-parse 2>/dev/null
 if [[ $? = 0 ]];
 then
-    echo "An existing Git repository was found at the destination."
+    printf "An existing Git repository was found at the destination.\n"
     is_bare=$(git -C $DESTINATION rev-parse --is-bare-repository)
     if [[ "$is_bare" = "false" ]];
     then
-        echo "Error: This is not a bare repository. The installation can only proceed using a bare respoitory."
-        echo "Create a new repository or select a different location."
+        printf "Error: This is not a bare repository. The installation can only proceed using a bare respoitory.\n"
+        printf "Create a new repository or select a different location.\n"
         exit 1
     else
-        echo "This is a bare repository and elibible for installation."
-        echo "Skipping re-initialization of the repository."
+        printf "This is a bare repository and elibible for installation.\n"
+        printf "Skipping re-initialization of the repository.\n"
     fi
 else
-    echo "No Git repository was found at the destination."
-    echo "Initializing a new installation at location $DESTINATION/"
+    printf "No Git repository was found at the destination.\n"
+    printf "Initializing a new installation at location %s/\n" "$DESTINATION"
     git init --bare "$DESTINATION"
 fi
 GIT_DIR="$DESTINATION"
@@ -65,25 +65,25 @@ then
 
     if [[ "$existing_hash" = "$new_hash" ]];
     then
-        echo "An existing post-receive Git hook was found that matches the one in the installer."
-        echo "Continuing with the installation..."
+        printf "An existing post-receive Git hook was found that matches the one in the installer.\n"
+        printf "Continuing with the installation...\n"
     else
-        echo -e "An existing post-receive Git hook was found at \"$HOOKS_DIR/post-receive\" that does not match the one being installed."
-        echo "Proceeding with the installation will replace the existing file."
-        echo "If you proceed with the installation, any modifications you've made to the post-receive hook will be lost."
-        echo -e "If you do not have a custom post-receive hook, then GitServerLite is simply updating the file.\n"
-        echo "Are you sure you would like to continue? (y/n):"
+        printf "An existing post-receive Git hook was found at \"%s/post-receive\" that does not match the one being installed.\n" "$HOOKS_DIR"
+        printf "Proceeding with the installation will replace the existing file.\n"
+        printf "If you proceed with the installation, any modifications you've made to the post-receive hook will be lost.\n"
+        printf "If you do not have a custom post-receive hook, then GitServerLite is simply updating the file.\n\n"
+        printf "Are you sure you would like to continue? (y/n):\n"
     
         read confirmation
         if [[ "$confirmation" = "y" || "$confirmation" = "yes" ]];
         then
-            echo "Continuing with the installation..."
+            printf "Continuing with the installation...\n"
         elif [[ "$confirmation" = "n" || "$confirmation" = "no" ]];
         then
-            echo "Error: Installation cancelled by user. No files were changed."
+            printf "Error: Installation cancelled by user. No files were changed.\n"
             exit 1
         else
-            echo -e "Error: must be \"yes\", \"y\", \"no\", or \"n\""
+            printf "Error: must be \"yes\", \"y\", \"no\", or \"n\"\n"
             exit 1
         fi
     fi
@@ -92,11 +92,11 @@ fi
 if [[ -f "$DESTINATION/.gitserverlite/env" ]];
 then
     . "$DESTINATION/.gitserverlite/env"
-    echo "A previous installation of GitServerLite was found at this location."
-    echo "Scripts will be updated but user configurations will be preserved."
+    printf "A previous installation of GitServerLite was found at this location.\n"
+    printf "Scripts will be updated but user configurations will be preserved.\n"
 fi
 
-echo "Setting up git hooks in destination $HOOKS_DIR/"
+printf "Setting up git hooks in destination %s/.\n" "$HOOKS_DIR"
 cp -f "src/post-receive" "$HOOKS_DIR/"
 chmod a+x "$HOOKS_DIR/post-receive"
 
@@ -107,7 +107,7 @@ MAIN_DIR="$GIT_DIR/.gitserverlite"
 mkdir -p "$MAIN_DIR"
 
 version=$(git describe --tags)
-echo -e "GSL_VERSION=\"$version\"" > "$MAIN_DIR/version"
+printf "GSL_VERSION=\"%s\"\n" "$version" > "$MAIN_DIR/version"
 
 copy_source_file "gsl-source"
 copy_source_file "matchanddeploy"
@@ -116,19 +116,19 @@ if [[ -z "$GSL_DEPLOY_DIR" ]];
 then
     GSL_DEPLOY_DIR="$GIT_DIR/deploy"
     mkdir -p "$GSL_DEPLOY_DIR"
-    echo -e "GSL_DEPLOY_DIR=\"deploy\"" >> "$MAIN_DIR/env"
-    echo "Deploy location set to: \"deploy/\"."
+    printf "GSL_DEPLOY_DIR=\"deploy\"\n" >> "$MAIN_DIR/env"
+    printf "Deploy location set to: \"deploy/\".\n"
 else
-    echo -e "Existing deploy location \""$GSL_DEPLOY_DIR"/\" used."
+    printf "Existing deploy location \"%s/\" used.\n" "$GSL_DEPLOY_DIR"
 fi
 
 if [[ -z "$GSL_DOCKER_COMPOSE_UP_PARAMS" ]];
 then
     GSL_DOCKER_COMPOSE_UP_PARAMS="--build --detach"
-    echo -e "GSL_DOCKER_COMPOSE_UP_PARAMS=\"$GSL_DOCKER_COMPOSE_UP_PARAMS\"" >> "$MAIN_DIR/env"
-    echo "Docker compose up parameters set to: \""$GSL_DOCKER_COMPOSE_UP_PARAMS"\"."
+    printf "GSL_DOCKER_COMPOSE_UP_PARAMS=\"%s\"\n" "$GSL_DOCKER_COMPOSE_UP_PARAMS" >> "$MAIN_DIR/env"
+    printf "Docker compose up parameters set to: \"%s\".\n" "$GSL_DOCKER_COMPOSE_UP_PARAMS"
 else
-    echo -e "Existing docker compose up parameters \""$GSL_DOCKER_COMPOSE_UP_PARAMS"\" used."
+    printf "Existing docker compose up parameters \"%s\" used.\n" "$GSL_DOCKER_COMPOSE_UP_PARAMS"
 fi
 
 GSL_DEPLOY_BRANCHES_DIR="$MAIN_DIR/deploy_branches"
