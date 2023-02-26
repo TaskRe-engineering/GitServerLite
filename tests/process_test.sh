@@ -16,7 +16,7 @@
 # limitations under the License.
 # 
 
-source "../src/gsl-deploy"
+. "../src/gsl-source"
 
 # Mocks and Stubs
 
@@ -70,4 +70,4 @@ test_process_ValidEnvFile_ReturnsExpected() {
 }
 
 # Load shUnit2.
-. shunit2
+. ./shunit2

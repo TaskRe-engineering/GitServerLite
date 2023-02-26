@@ -16,7 +16,7 @@
 # limitations under the License.
 # 
 
-source "../src/gsl-branch"
+. "../src/gsl-source"
 
 # Tests
 
@@ -39,4 +39,4 @@ test_validate_branch_name_SingleWordName_ReturnsExpected() {
 }
 
 # Load shUnit2.
-. shunit2
+. ./shunit2

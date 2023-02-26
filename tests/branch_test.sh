@@ -16,7 +16,7 @@
 # limitations under the License.
 # 
 
-source "../src/gsl-branch"
+. "../src/gsl-source"
 
 # SetUp and tearDown
 
@@ -56,4 +56,4 @@ test_branch_NoDeployDir_ReturnsFullPath() {
 }
 
 # Load shUnit2.
-. shunit2
+. ./shunit2

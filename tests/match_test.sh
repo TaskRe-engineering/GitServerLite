@@ -16,7 +16,7 @@
 # limitations under the License.
 # 
 
-source "../src/gsl-branch"
+. "../src/gsl-source"
 
 # Mocks and Stubs
 
@@ -63,4 +63,4 @@ test_match_FirstPartOfBranchNameMatchingRef_ReturnsNull() {
 }
 
 # Load shUnit2.
-. shunit2
+. ./shunit2

@@ -91,7 +91,7 @@ fi
 
 if [[ -f "$DESTINATION/.gitserverlite/env" ]];
 then
-    source "$DESTINATION/.gitserverlite/env"
+    . "$DESTINATION/.gitserverlite/env"
     echo "A previous installation of GitServerLite was found at this location."
     echo "Scripts will be updated but user configurations will be preserved."
 fi
@@ -109,13 +109,7 @@ mkdir -p "$MAIN_DIR"
 version=$(git describe --tags)
 echo -e "GSL_VERSION=\"$version\"" > "$MAIN_DIR/version"
 
-copy_source_file "gsl-branch"
-copy_source_file "gsl-deploy"
-copy_source_file "gsl-eval"
-copy_source_file "gsl-file"
-copy_source_file "gsl-git"
-copy_source_file "gsl-io"
-copy_source_file "gsl-manage"
+copy_source_file "gsl-source"
 copy_source_file "matchanddeploy"
 
 if [[ -z "$GSL_DEPLOY_DIR" ]];

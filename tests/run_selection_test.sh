@@ -16,7 +16,7 @@
 # limitations under the License.
 # 
 
-source "../src/gsl-manage"
+. "../src/gsl-source"
 
 # Mocks and Stubs
 
@@ -85,4 +85,4 @@ test_run_selection_ShowDeployLocationCommandGiven_RunsExpectedCommand() {
 }
 
 # Load shUnit2.
-. shunit2
+. ./shunit2

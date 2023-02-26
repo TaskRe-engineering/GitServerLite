@@ -1,0 +1,303 @@
+#!/usr/bin/env bash
+
+#
+# Copyright 2023 Task Re-engineering Inc.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# 
+
+#for debugging
+#set -ex
+
+branch() {
+    local branch_location="$1"
+
+    if [[ -z "$branch_location" ]];
+    then
+        exit 1
+    fi
+
+    local raw_branch="${branch_location#$GSL_DEPLOY_BRANCHES_DIR}"
+
+    if [[ $raw_branch == /* ]];
+    then
+        echo "${raw_branch:1}"
+    else
+        echo "$raw_branch"
+    fi
+}
+
+match() {
+    local ref="$1"
+
+    local match=""
+
+    for branch_location in "${GSL_BRANCHES[@]}"
+    do
+        local branch="$(branch $branch_location)"
+
+        if [[ "$ref" = "refs/heads/$branch" ]];
+        then
+            match="$branch_location"
+        fi
+    done
+
+    echo "$match"
+}
+
+validate_branch_name() {
+    local branch_name="$1"
+
+    if [[ "$branch_name" =~ [^a-zA-Z0-9] ]];
+    then
+        exit 64
+    fi
+}
+
+process() {
+    local git_dir="$1"
+    local deploy_dir="$2"
+    local params="$3"
+    local branch="$4"
+    local env_file="$5"
+
+    if [[ -z "$git_dir" || -z "$deploy_dir" || -z "$params" || -z "$branch" ]];
+    then
+        exit 1
+    fi
+    
+    local target="$deploy_dir/deploy_$branch"
+    local run_command="checkout "$git_dir" "$branch" "$target"; deploy "$target" \""$params"\" "$env_file""
+    _run "$run_command"
+}
+
+deploy() {
+    local target="$1"
+    local params="$2"
+    local env_file="$3"
+
+    if [[ -z "$target" || -z "$params" ]];
+    then
+        exit 1
+    fi
+
+    local run_command
+    if [[ -z "$env_file" ]];
+    then
+        echo "Running Docker compose up. No environment file specified, so .env will be used if it exists."
+        run_command="cd "$target"; docker compose up $params"
+    else
+        echo "Running Docker compose up with environment file \""$env_file"\"."
+        run_command="cd "$target"; docker compose --env-file "$env_file" up $params"
+    fi
+    
+    _run "$run_command"
+}
+
+get_branches() {
+    GSL_BRANCHES=("$GSL_DEPLOY_BRANCHES_DIR"/*)
+}
+
+create_branch_file() {
+    local branch_name="$1"
+    local env_file="$2"
+
+    local file="$GSL_DEPLOY_BRANCHES_DIR/$branch_name"
+
+    echo -e "# Deploy branch record for branch \"$branch_name\"" > "$file"
+    
+    if [[ ! -z "$env_file" ]];
+    then
+        echo "env_file=$env_file" >> "$file"
+    else
+        echo -e "# No env-file specified. \".env\" will be used if it exists, otherwise none will be used." >> "$file"
+    fi
+
+    echo "Deploy record for branch \"$branch_name\" successfully created."
+}
+
+remove_branch_file() {
+    local file="$1"
+
+    if [[ ! -f "$file" ]];
+    then
+        exit 65
+    fi
+
+    rm -f "$file"
+
+    echo "Deploy record for branch $branch_name successfully removed."
+}
+
+load_branch_file() {
+    local branch_location="$1"
+
+    . "$branch_location"
+}
+
+checkout() {
+    local git_dir="$1"
+    local branch="$2"
+    local target="$3"
+
+    if [[ -z "$git_dir" || -z "$branch" || -z "$target" ]];
+    then
+        exit 1
+    fi
+    
+    local run_command="mkdir -p "$target"; git --work-tree="$target" --git-dir="$git_dir" checkout -f "$branch""
+    _run "$run_command"
+}
+
+print_invalid_command() {
+    echo -e "Invalid: invalid command.\n"
+    display_manual
+}
+
+handle_exit() {
+    local exit_status="$1"
+
+    if [[ $exit_status -ne 0 ]];
+    then
+        if [[ $exit_status -eq 64 ]];
+        then
+            echo "Error: branch name must be alphanumeric."
+        elif [[ $exit_status -eq 65 ]];
+        then
+            echo "Error: branch not found."
+        else
+            print_invalid_command
+        fi
+    fi
+}
+
+display_manual() {
+    [ "$*" ] && echo "$0: $*"
+    sed -n '/^##/,/^$/s/^## \{0,1\}//p' "$0"
+}
+
+add_branch() {
+    local branch_name="$1"
+
+    if [[ -z "$branch_name" ]];
+    then
+        exit 1
+    fi
+
+    validate_branch_name "$branch_name"
+    
+    echo "Enter the .env file name: (optional)"
+    read -e env_file
+
+    local run_command="create_branch_file "$branch_name" "$env_file""
+    _run "$run_command"
+}
+
+remove_branch() {
+    local branch_name="$1"
+
+    if [[ -z "$branch_name" ]];
+    then
+        exit 1
+    fi
+
+    local file="$GSL_DEPLOY_BRANCHES_DIR/$branch_name"
+
+    local run_command="remove_branch_file "$file""
+    _run "$run_command"
+}
+
+list() {
+    if [[ ${#GSL_BRANCHES[@]} == 0 ]];
+    then
+        echo "There are no deploy branch records configured."
+    fi
+
+    for branch_location in "${GSL_BRANCHES[@]}"
+    do
+        echo "$(branch "$branch_location" "$GSL_DEPLOY_BRANCHES_DIR")"
+    done
+}
+
+show_branch() {
+    local branch_name="$1"
+
+    if [[ -z "$branch_name" ]];
+    then
+        exit 1
+    fi
+
+    local branch_location="$GSL_DEPLOY_BRANCHES_DIR/$branch_name"
+
+    if [[ ! -f "$branch_location" ]];
+    then
+        exit 65
+    fi
+
+    echo -e "Displaying record for deploy branch $branch_name:"
+    echo "==== START ===="
+    cat "$branch_location"
+    echo -e "===== END =====\n"
+}
+
+show_deploy_directory() {
+    echo "$GSL_DEPLOY_DIR/"
+}
+
+show_version() {
+    echo "gitserverlite version $GSL_VERSION"
+}
+
+run_selection() {
+    command="$1"
+    argument1="$2"
+
+    local run_command=""
+    if [[ "$command" = "help" ]];
+    then
+        run_command="display_manual"
+    elif [ "$command" = "add-branch" ];
+    then
+        run_command="add_branch "$argument1""
+    elif [ "$command" = "remove-branch" ];
+    then
+        run_command="remove_branch "$argument1""
+    elif [ "$command" = "list" ];
+    then
+        run_command="list"
+    elif [ "$command" = "show-branch" ];
+    then
+        run_command="show_branch "$argument1""
+    elif [ "$command" = "show-deploy-location" ];
+    then
+        run_command="show_deploy_directory"
+    elif [ "$command" = "version" ];
+    then
+        run_command="show_version"
+    else
+        exit 1
+    fi
+    
+    _run "$run_command"
+}
+
+_run() {
+    local run_command="$1"
+
+    if [[ -z "$run_command" ]];
+    then
+        exit 1
+    fi
+
+    eval "$run_command"
+}

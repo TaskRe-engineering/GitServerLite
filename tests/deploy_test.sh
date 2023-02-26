@@ -16,7 +16,7 @@
 # limitations under the License.
 # 
 
-source "../src/gsl-deploy"
+. "../src/gsl-source"
 
 # Mocks
 
@@ -50,14 +50,14 @@ test_deploy_NoParameters_ExpectedExitStatus() {
 }
 
 test_deploy_NoEnvFile_ReturnExpected() {
-    deploy /var/deploy "--build --detach"
+    deploy /var/deploy "--build --detach" > /dev/null
     assertEquals "cd /var/deploy; docker compose up --build --detach" "$GSL_LAST_RUN"
 }
 
 test_deploy_ValidEnvFile_ReturnExpected() {
-    deploy /var/deploy "--build --detach" .env.dev
+    deploy /var/deploy "--build --detach" .env.dev > /dev/null
     assertEquals "cd /var/deploy; docker compose --env-file .env.dev up --build --detach" "$GSL_LAST_RUN"
 }
 
 # Load shUnit2.
-. shunit2
+. ./shunit2

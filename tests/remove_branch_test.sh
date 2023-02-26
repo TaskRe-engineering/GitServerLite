@@ -16,7 +16,7 @@
 # limitations under the License.
 # 
 
-source "../src/gsl-manage"
+. "../src/gsl-source"
 
 # Mocks and Stubs
 
@@ -51,4 +51,4 @@ test_remove_branch_ValidBranch_RemovesExpectedBranch() {
 }
 
 # Load shUnit2.
-. shunit2
+. ./shunit2

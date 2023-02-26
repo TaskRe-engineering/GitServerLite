@@ -16,7 +16,7 @@
 # limitations under the License.
 # 
 
-source "../src/gsl-git"
+. "../src/gsl-source"
 
 # Mocks and Stubs
 
@@ -60,4 +60,4 @@ test_checkout_ValidParametersSingleWorkdBranch_ReturnsExpected() {
 }
 
 # Load shUnit2.
-. shunit2
+. ./shunit2

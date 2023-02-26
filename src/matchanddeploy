@@ -26,10 +26,8 @@ GIT_DIR="$2"
 
 GSL_DIR=".gitserverlite"
 
-source "$GSL_DIR/env"
-source "$GSL_DIR/gsl-branch"
-source "$GSL_DIR/gsl-file"
-source "$GSL_DIR/gsl-deploy"
+. "$GSL_DIR/env"
+. "$GSL_DIR/gsl-source"
 
 GSL_DEPLOY_BRANCHES_DIR="$GSL_DIR/deploy_branches"
 get_branches

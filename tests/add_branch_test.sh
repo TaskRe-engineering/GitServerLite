@@ -16,7 +16,7 @@
 # limitations under the License.
 # 
 
-source "../src/gsl-manage"
+. "../src/gsl-source"
 
 # Mocks and Stubs
 
@@ -66,4 +66,4 @@ test_add_branch_ValidBranchNameWithEnvFile_ReturnsExpected() {
 }
 
 # Load shUnit2.
-. shunit2
+. ./shunit2
