@@ -8,30 +8,42 @@ branch() {
     echo "$1"
 }
 
+# SetUp and tearDown
+
+setUp() {
+    GSL_BRANCHES=""
+}
+
 # Tests
 
-test_match_BranchNameMatchingRef_ReturnsExpected() {
-    local BRANCHES=("main" "develop" "prototype" "test")
-    local RESULT="$(match refs/heads/main $BRANCHES)"
-    assertEquals "main" "$RESULT"
+test_match_BranchNameMatchingFirstRef_ReturnsExpected() {
+    GSL_BRANCHES=("main" "develop" "prototype" "test")
+    local result="$(match refs/heads/main)"
+    assertEquals "main" "$result"
+}
+
+test_match_BranchNameMatchingArbitraryRef_ReturnsExpected() {
+    GSL_BRANCHES=("main" "develop" "prototype" "test")
+    local result="$(match refs/heads/prototype)"
+    assertEquals "prototype" "$result"
 }
 
 test_match_NoBranchNameMatchingRef_ReturnsNull() {
-    local BRANCHES=("main" "develop" "prototype" "test")
-    local RESULT="$(match refs/heads/mybranch $BRANCHES)"
-    assertNull "$RESULT"
+    GSL_BRANCHES=("main" "develop" "prototype" "test")
+    local result="$(match refs/heads/mybranch)"
+    assertNull "$result"
 }
 
 test_match_LastPartOfBranchNameMatchingRef_ReturnsNull() {
-    local BRANCHES=("main" "develop" "prototype" "test")
-    local RESULT="$(match refs/heads/wip/main $BRANCHES)"
-    assertNull "$RESULT"
+    GSL_BRANCHES=("main" "develop" "prototype" "test")
+    local result="$(match refs/heads/wip/main)"
+    assertNull "$result"
 }
 
 test_match_FirstPartOfBranchNameMatchingRef_ReturnsNull() {
-    local BRANCHES=("main" "develop" "prototype" "test")
-    local RESULT="$(match refs/heads/main/main $BRANCHES)"
-    assertNull "$RESULT"
+    GSL_BRANCHES=("main" "develop" "prototype" "test")
+    local result="$(match refs/heads/main/main)"
+    assertNull "$result"
 }
 
 # Load shUnit2.

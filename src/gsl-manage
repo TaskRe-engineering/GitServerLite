@@ -41,33 +41,28 @@ add_branch() {
 
 remove_branch() {
     local branch_name="$1"
+    local deploy_branches_dir="$2"
 
-    if [[ -z "$branch_name" ]];
+    if [[ -z "$branch_name" || -z "$deploy_branches_dir" ]];
     then
         exit 1
     fi
 
-    local file="$GSL_DEPLOY_BRANCHES_DIR/$branch_name"
-
-    if [[ ! -f "$file" ]];
-    then
-        exit 1
-    fi
+    local file="$deploy_branches_dir/$branch_name"
 
     local run_command="remove_branch_file "$file""
     _run "$run_command"
 }
 
 list() {
-    local branches="$1"
     local deploy_branches_dir="$2"
 
-    if [[ ${#branches[@]} == 0 ]];
+    if [[ ${#GSL_BRANCHES[@]} == 0 ]];
     then
         echo "There are no deploy branch records configured."
     fi
 
-    for branch_location in "${branches[@]}"
+    for branch_location in "${GSL_BRANCHES[@]}"
     do
         echo "$(branch "$branch_location" "$deploy_branches_dir")"
     done
@@ -106,33 +101,31 @@ run_selection() {
     command="$1"
     argument1="$2"
 
-    if [[ -z "$command" ]];
-    then
-        exit 1
-    fi
-
+    local run_command=""
     if [[ "$command" = "help" ]];
     then
-        display_manual
+        run_command="display_manual"
     elif [ "$command" = "add-branch" ];
     then
-        add_branch $argument1
+        run_command="add_branch "$argument1""
     elif [ "$command" = "remove-branch" ];
     then
-        remove_branch $argument1
+        run_command="remove_branch "$argument1" "$GSL_DEPLOY_BRANCHES_DIR""
     elif [ "$command" = "list" ];
     then
-        list "$GSL_BRANCHES" "$GSL_DEPLOY_BRANCHES_DIR"
+        run_command="list "$GSL_DEPLOY_BRANCHES_DIR""
     elif [ "$command" = "show-branch" ];
     then
-        show_branch $argument1
+        run_command="show_branch "$argument1""
     elif [ "$command" = "show-deploy-location" ];
     then
-        show_deploy_directory
+        run_command="show_deploy_directory"
     elif [ "$command" = "version" ];
     then
-        show_version
+        run_command="show_version"
     else
         exit 1
     fi
+    
+    _run "$run_command"
 }

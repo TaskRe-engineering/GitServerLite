@@ -28,7 +28,7 @@ get_branches
 
 GSL_PARAMS="--build --detach"
 
-match="$(match "$ref" "$branches")"
+match="$(match "$ref")"
 if [[ ! -z "$match" ]];
 then
     echo "Ref $ref received. Matches branch configured to automatically deploy."

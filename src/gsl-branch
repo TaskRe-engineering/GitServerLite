@@ -36,11 +36,10 @@ branch() {
 
 match() {
     local ref="$1"
-    local branches="$2"
 
     local match=""
 
-    for branch_location in "${branches[@]}"
+    for branch_location in "${GSL_BRANCHES[@]}"
     do
         local branch="$(branch $branch_location)"
 
