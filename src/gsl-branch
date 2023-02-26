@@ -17,14 +17,13 @@ source "$SCRIPT_DIR/gsl-eval"
 
 branch() {
     local branch_location="$1"
-    local deploy_branches_dir="$2"
 
     if [[ -z "$branch_location" ]];
     then
         exit 1
     fi
 
-    local raw_branch="${branch_location#$deploy_branches_dir}"
+    local raw_branch="${branch_location#$GSL_DEPLOY_BRANCHES_DIR}"
 
     if [[ $raw_branch == /* ]];
     then

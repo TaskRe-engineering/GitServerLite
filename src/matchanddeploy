@@ -23,7 +23,7 @@ source "$GSL_DIR/gsl-branch"
 source "$GSL_DIR/gsl-file"
 source "$GSL_DIR/gsl-deploy"
 
-GSL_DEPLOY_BRANCHES_DIR="$GIT_DIR/$GSL_DIR/deploy_branches"
+GSL_DEPLOY_BRANCHES_DIR="$GSL_DIR/deploy_branches"
 get_branches
 
 GSL_PARAMS="--build --detach"
@@ -34,7 +34,7 @@ then
     echo "Ref $ref received. Matches branch configured to automatically deploy."
 
     load_branch_file "$match"
-    branch="$(branch "$match" "$GSL_DEPLOY_BRANCHES_DIR")"
+    branch="$(branch "$match")"
     
     process "$GIT_DIR" "$GSL_DEPLOY_DIR" "$GSL_PARAMS" "$branch" "$ENV_FILE"
 else

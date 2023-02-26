@@ -2,25 +2,35 @@
 
 source "../src/gsl-branch"
 
+# SetUp and tearDown
+
+setUp() {
+    GSL_DEPLOY_BRANCHES_DIR=""
+}
+
 # Tests
 
 test_branch_SimpleBranchName_ReturnsExpected() {
-    local RESULT="$(branch /var/myrepo/.gitserverlite/deploy_records/main /var/myrepo/.gitserverlite/deploy_records)"
+    GSL_DEPLOY_BRANCHES_DIR="/var/myrepo/.gitserverlite/deploy_records"
+    local RESULT="$(branch /var/myrepo/.gitserverlite/deploy_records/main)"
     assertEquals "main" "$RESULT"
 }
 
 test_branch_NestedFolderBranchName_ReturnsExpected() {
-    local RESULT="$(branch /var/myrepo/.gitserverlite/deploy_records/wip/mybranch /var/myrepo/.gitserverlite/deploy_records)"
+    GSL_DEPLOY_BRANCHES_DIR="/var/myrepo/.gitserverlite/deploy_records"
+    local RESULT="$(branch /var/myrepo/.gitserverlite/deploy_records/wip/mybranch)"
     assertEquals "wip/mybranch" "$RESULT"
 }
 
 test_branch_RelativePaths_ReturnsExpected() {
-    local RESULT="$(branch .gitserverlite/deploy_records/main .gitserverlite/deploy_records)"
+    GSL_DEPLOY_BRANCHES_DIR=".gitserverlite/deploy_records"
+    local RESULT="$(branch .gitserverlite/deploy_records/main)"
     assertEquals "main" "$RESULT"
 }
 
 test_branch_NoBranchName_ReturnsNull() {
-    local RESULT="$(branch /var/myrepo/.gitserverlite/deploy_records /var/myrepo/.gitserverlite/deploy_records)"
+    GSL_DEPLOY_BRANCHES_DIR="/var/myrepo/.gitserverlite/deploy_records"
+    local RESULT="$(branch /var/myrepo/.gitserverlite/deploy_records)"
     assertNull "$RESULT"
 }
 
