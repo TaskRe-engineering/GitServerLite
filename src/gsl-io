@@ -15,3 +15,20 @@ print_invalid_command() {
     echo -e "Invalid: invalid command.\n"
     display_manual
 }
+
+handle_exit() {
+    local exit_status="$1"
+
+    if [[ $exit_status -ne 0 ]];
+    then
+        if [[ $exit_status -eq 64 ]];
+        then
+            echo "Error: branch name must be alphanumeric."
+        elif [[ $exit_status -eq 65 ]];
+        then
+            echo "Error: branch not found."
+        else
+            print_invalid_command
+        fi
+    fi
+}

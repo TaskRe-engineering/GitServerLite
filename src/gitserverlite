@@ -41,5 +41,5 @@ get_branches
 exit_status=$?
 if [[ $exit_status -ne 0 ]];
 then
-    print_invalid_command
+    handle_exit $exit_status
 fi

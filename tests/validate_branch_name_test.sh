@@ -7,13 +7,13 @@ source "../src/gsl-branch"
 test_validate_branch_name_SpaceInName_ExpectedExit() {
     BRANCH="main main"
     (validate_branch_name "$BRANCH")
-    assertEquals 1 $?
+    assertEquals 64 $?
 }
 
 test_validate_branch_name_SpecialCharacterInName_ExpectedExit() {
     BRANCH="main?main"
     (validate_branch_name "$BRANCH")
-    assertEquals 1 $?
+    assertEquals 64 $?
 }
 
 test_validate_branch_name_SingleWordName_ReturnsExpected() {

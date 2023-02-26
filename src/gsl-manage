@@ -77,7 +77,7 @@ show_branch() {
 
     if [[ ! -f "$branch_location" ]];
     then
-        exit 1
+        exit 65
     fi
 
     echo -e "Displaying record for deploy branch $branch_name:"

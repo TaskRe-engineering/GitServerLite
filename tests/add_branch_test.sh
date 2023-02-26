@@ -30,7 +30,7 @@ test_add_branch_NoBranchName_ExpectedExitStatus() {
 
 test_add_branch_InvalidBranchName_ExpectedExitStatus() {
     (add_branch "main?main")
-    assertEquals 1 $?
+    assertEquals 64 $?
 }
 
 test_add_branch_ValidBranchNameNoEnvFile_ReturnsExpected() {
