@@ -23,54 +23,55 @@ display_manual() {
 }
 
 add_branch() {
-    BRANCH_NAME="$1"
+    local branch_name="$1"
 
-    if [[ -z "$BRANCH_NAME" ]];
+    if [[ -z "$branch_name" ]];
     then
         exit 1
     fi
 
-    validate_branch_name "$BRANCH_NAME"
+    validate_branch_name "$branch_name"
     
     echo "Enter the .env file name: (optional)"
     read -e ENV_FILE
 
-    _create_branch_file "$BRANCH_NAME" "$ENV_FILE"
-
-    echo "Deploy record for branch \"$BRANCH_NAME\" successfully created."
+    local cmd="create_branch_file "$branch_name" "$ENV_FILE""
+    local result="$(_run "$cmd")"
+    echo "$result"
 }
 
 remove_branch() {
-    BRANCH_NAME="$1"
+    local branch_name="$1"
 
-    if [[ -z "$BRANCH_NAME" ]];
+    if [[ -z "$branch_name" ]];
     then
         exit 1
     fi
 
-    FILE="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
+    local file="$GSL_DEPLOY_BRANCHES_DIR/$branch_name"
 
-    if [[ ! -f "$FILE" ]];
+    if [[ ! -f "$file" ]];
     then
         exit 1
     fi
 
-    _remove_branch_file "$FILE"
-    echo "Deploy record for branch $BRANCH_NAME successfully removed."
+    local cmd="remove_branch_file "$file""
+    local result="$(_run "$cmd")"
+    echo "$result"
 }
 
 list() {
-    BRANCHES="$1"
-    DEPLOY_BRANCHES_DIR="$2"
+    local branches="$1"
+    local deploy_branches_dir="$2"
 
-    if [[ ${#BRANCHES[@]} == 0 ]];
+    if [[ ${#branches[@]} == 0 ]];
     then
         echo "There are no deploy branch records configured."
     fi
 
-    for BRANCH_LOCATION in "${BRANCHES[@]}"
+    for branch_location in "${branches[@]}"
     do
-        echo "$(branch "$BRANCH_LOCATION" "$DEPLOY_BRANCHES_DIR")"
+        echo "$(branch "$branch_location" "$deploy_branches_dir")"
     done
 }
 
@@ -82,7 +83,7 @@ show_branch() {
         exit 1
     fi
 
-    local branch_location="$DEPLOY_BRANCHES_DIR/$branch_name"
+    local branch_location="$GSL_DEPLOY_BRANCHES_DIR/$branch_name"
 
     if [[ ! -f "$branch_location" ]];
     then
@@ -96,11 +97,11 @@ show_branch() {
 }
 
 show_deploy_directory() {
-    echo "$DEPLOY_DIR/"
+    echo "$GSL_DEPLOY_DIR/"
 }
 
 show_version() {
-    echo "gitserverlite version $VERSION"
+    echo "gitserverlite version $GSL_VERSION"
 }
 
 run_selection() {
@@ -123,7 +124,7 @@ run_selection() {
         remove_branch $argument1
     elif [ "$command" = "list" ];
     then
-        list "$BRANCHES" "$DEPLOY_BRANCHES_DIR"
+        list "$GSL_BRANCHES" "$GSL_DEPLOY_BRANCHES_DIR"
     elif [ "$command" = "show-branch" ];
     then
         show_branch $argument1

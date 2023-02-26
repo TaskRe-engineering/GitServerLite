@@ -12,13 +12,13 @@
 #
 
 _run() {
-        COMMAND="$1"
+    COMMAND="$1"
 
-        if [[ -z "$COMMAND" ]];
-        then
-                exit 1
-        fi
+    if [[ -z "$COMMAND" ]];
+    then
+        exit 1
+    fi
 
-        eval "$COMMAND"
-        echo "$COMMAND"
+    eval "$COMMAND"
+    echo "$COMMAND"
 }

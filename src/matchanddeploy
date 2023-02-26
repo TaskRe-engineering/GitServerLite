@@ -16,27 +16,27 @@ shopt -s nullglob
 ref="$1"
 GIT_DIR="$2"
 
-SOURCE_DIR=".gitserverlite"
+GSL_DIR=".gitserverlite"
 
-source "$SOURCE_DIR/env"
-source "$SOURCE_DIR/gsl-branch"
-source "$SOURCE_DIR/gsl-file"
-source "$SOURCE_DIR/gsl-deploy"
+source "$GSL_DIR/env"
+source "$GSL_DIR/gsl-branch"
+source "$GSL_DIR/gsl-file"
+source "$GSL_DIR/gsl-deploy"
 
-DEPLOY_BRANCHES_DIR="$GIT_DIR/$SOURCE_DIR/deploy_branches"
-BRANCHES=("$DEPLOY_BRANCHES_DIR"/*)
+GSL_DEPLOY_BRANCHES_DIR="$GIT_DIR/$GSL_DIR/deploy_branches"
+get_branches
 
-PARAMS="--build --detach"
+GSL_PARAMS="--build --detach"
 
-MATCH="$(match "$ref" "$BRANCHES")"
-if [[ ! -z "$MATCH" ]];
+match="$(match "$ref" "$branches")"
+if [[ ! -z "$match" ]];
 then
-        echo "Ref $ref received. Matches branch configured to automatically deploy."
+    echo "Ref $ref received. Matches branch configured to automatically deploy."
 
-        load_branch_file "$MATCH"
-        BRANCH="$(branch "$MATCH" "$DEPLOY_BRANCHES_DIR")"
-        
-        process "$GIT_DIR" "$DEPLOY_DIR" "$PARAMS" "$BRANCH" "$ENV_FILE"
+    load_branch_file "$match"
+    branch="$(branch "$match" "$GSL_DEPLOY_BRANCHES_DIR")"
+    
+    process "$GIT_DIR" "$GSL_DEPLOY_DIR" "$GSL_PARAMS" "$branch" "$ENV_FILE"
 else
-        echo "Ref $ref received. Doing nothing: does not match branches configured to automatically deploy."
+    echo "Ref $ref received. Doing nothing: does not match branches configured to automatically deploy."
 fi

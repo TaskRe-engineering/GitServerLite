@@ -11,28 +11,36 @@
 # LICENSE file in the root directory of this source tree. 
 #
 
+get_branches() {
+    GSL_BRANCHES=("$GSL_DEPLOY_BRANCHES_DIR"/*)
+}
+
 create_branch_file() {
-    BRANCH_NAME="$1"
-    ENV_FILE="$2"
+    local branch_name="$1"
+    local env_file="$2"
 
-    FILE="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
+    local file="$GSL_DEPLOY_BRANCHES_DIR/$branch_name"
 
-    echo -e "# Deploy branch record for branch \"$BRANCH_NAME\"" > "$FILE"
+    echo -e "# Deploy branch record for branch \"$branch_name\"" > "$file"
     
-    if [[ ! -z "$ENV_FILE" ]];
+    if [[ ! -z "$env_file" ]];
     then
-        echo "ENV_FILE=$ENV_FILE" >> "$FILE"
+        echo "ENV_FILE=$env_file" >> "$file"
     fi
+
+    echo "Deploy record for branch \"$branch_name\" successfully created."
 }
 
 remove_branch_file() {
-    BRANCH_NAME="$1"
+    local file="$1"
 
-    rm "$FILE"
+    rm -f "$file"
+
+    echo "Deploy record for branch $branch_name successfully removed."
 }
 
 load_branch_file() {
-        BRANCH_LOCATION="$1"
+    local branch_location="$1"
 
-        source "$BRANCH_LOCATION"
+    source "$branch_location"
 }

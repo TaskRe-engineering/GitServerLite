@@ -3,14 +3,14 @@
 source "../src/gsl-git"
 
 _run() {
-        COMMAND="$1"
+    COMMAND="$1"
 
-        if [[ -z "$COMMAND" ]];
-        then
-                exit 1
-        fi
+    if [[ -z "$COMMAND" ]];
+    then
+            exit 1
+    fi
 
-        echo "$COMMAND"
+    echo "$COMMAND"
 }
 
 test_checkout_NoGitDir_ExpectedExitStatus() {

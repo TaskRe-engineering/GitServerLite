@@ -24,18 +24,18 @@
 
 shopt -s nullglob
 
-SOURCE_DIR=".gitserverlite"
-
-source "$SOURCE_DIR/env"
-source "$SOURCE_DIR/gsl-io"
-source "$SOURCE_DIR/gsl-manage"
-source "$SOURCE_DIR/version"
-
-DEPLOY_BRANCHES_DIR="$SOURCE_DIR/deploy_branches"
-BRANCHES=("$DEPLOY_BRANCHES_DIR"/*)
-
 command="$1"
 argument1="$2"
+
+GSL_DIR=".gitserverlite"
+
+source "$GSL_DIR/env"
+source "$GSL_DIR/gsl-io"
+source "$GSL_DIR/gsl-manage"
+source "$GSL_DIR/version"
+
+GSL_DEPLOY_BRANCHES_DIR="$GSL_DIR/deploy_branches"
+get_branches
 
 (run_selection "$command" "$argument1")
 exit_status=$?
