@@ -19,8 +19,6 @@ _run() {
 
 setUp() {
     GSL_LAST_RUN=""
-    GSL_BRANCHES=""
-    GSL_DEPLOY_BRANCHES_DIR=""
 }
 
 # Tests
@@ -46,15 +44,13 @@ test_run_selection_AddBranchCommandGiven_RunsExpectedCommand() {
 }
 
 test_run_selection_AddBranchCommandGiven_RunsExpectedCommand() {
-    GSL_DEPLOY_BRANCHES_DIR=/var/git/my_repo.git/.gitserverlite/deploy_branches
     run_selection "remove-branch" "main"
-    assertEquals "remove_branch main /var/git/my_repo.git/.gitserverlite/deploy_branches" "$GSL_LAST_RUN"
+    assertEquals "remove_branch main" "$GSL_LAST_RUN"
 }
 
 test_run_selection_ListCommandGiven_RunsExpectedCommand() {
-    GSL_DEPLOY_BRANCHES_DIR=/var/git/my_repo.git/.gitserverlite/deploy_branches
     run_selection "list"
-    assertEquals "list /var/git/my_repo.git/.gitserverlite/deploy_branches" "$GSL_LAST_RUN"
+    assertEquals "list" "$GSL_LAST_RUN"
 }
 
 test_run_selection_ShowBranchCommandGiven_RunsExpectedCommand() {

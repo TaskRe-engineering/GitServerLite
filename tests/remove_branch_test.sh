@@ -19,6 +19,7 @@ _run() {
 
 setUp() {
     GSL_LAST_RUN=""
+    GSL_DEPLOY_BRANCHES_DIR="/var/git/my_repo.git/.gitserverlite/deploy_branches"
 }
 
 # Tests
@@ -28,13 +29,8 @@ test_remove_branch_NoBranchName_ExpectedExitStatus() {
     assertEquals 1 $?
 }
 
-test_remove_branch_NoDeployBranchDirectory_ExpectedExitStatus() {
-    (remove_branch main)
-    assertEquals 1 $?
-}
-
-test_remove_branch_ValidBranchAndName_RemovesExpectedBranch() {
-    remove_branch main /var/git/my_repo.git/.gitserverlite/deploy_branches
+test_remove_branch_ValidBranch_RemovesExpectedBranch() {
+    remove_branch main
     assertEquals "remove_branch_file /var/git/my_repo.git/.gitserverlite/deploy_branches/main" "$GSL_LAST_RUN"
 }
 
