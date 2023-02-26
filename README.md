@@ -144,4 +144,4 @@ The post-deploy hook will run immediately after deployment completes. To create 
 
 ## License
 
-This source code is licensed under the <> license found in the [LICENSE](LICENSE.txt) file in the root directory of this source tree.
+This source code is licensed under the Apache License, Version 2.0 found in the [LICENSE](LICENSE.txt) file in the root directory of this source tree.
