@@ -12,16 +12,16 @@
 #
 
 checkout() {
-    GIT_DIR="$1"
-    BRANCH="$2"
-    TARGET="$3"
+    local git_dir="$1"
+    local branch="$2"
+    local target="$3"
 
-    if [[ -z "$GIT_DIR" || -z "$BRANCH" || -z "$TARGET" ]];
+    if [[ -z "$git_dir" || -z "$branch" || -z "$target" ]];
     then
         exit 1
     fi
     
-    local CHECKOUT_CMD="mkdir -p "$TARGET"; git --work-tree="$TARGET" --git-dir="$GIT_DIR" checkout -f "$BRANCH""
-    local RESULT="$(_run "$CHECKOUT_CMD")"
-    echo "$RESULT"
+    local command="mkdir -p "$target"; git --work-tree="$target" --git-dir="$git_dir" checkout -f "$branch""
+    local result="$(_run "$command")"
+    echo "$result"
 }
