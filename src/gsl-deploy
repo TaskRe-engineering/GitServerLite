@@ -1,0 +1,57 @@
+#!/bin/bash
+
+#for debugging
+#set -ex
+
+#
+# Copyright © 2023 Task Re-engineering Inc.
+# All rights reserved.
+# 
+# This source code is licensed under the [] license found in the
+# LICENSE file in the root directory of this source tree. 
+#
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+source "$SCRIPT_DIR/gsl-eval"
+source "$SCRIPT_DIR/gsl-git"
+
+process() {
+    local git_dir="$1"
+    local deploy_dir="$2"
+    local params="$3"
+    local branch="$4"
+    local env_file="$5"
+
+    if [[ -z "$git_dir" || -z "$deploy_dir" || -z "$params" || -z "$branch" ]];
+    then
+        exit 1
+    fi
+    
+    local target="$deploy_dir/deploy_$branch"
+    local run_command="checkout "$git_dir" "$branch" "$target"; deploy "$target" \""$params"\" "$env_file""
+    _run "$run_command"
+}
+
+deploy() {
+    local target="$1"
+    local params="$2"
+    local env_file="$3"
+
+    if [[ -z "$target" || -z "$params" ]];
+    then
+        exit 1
+    fi
+
+    local run_command
+    if [[ -z "$env_file" ]];
+    then
+        echo "Running Docker compose up. No environment file specified, so .env will be used if it exists."
+        run_command="cd "$target"; docker compose up $params"
+    else
+        echo "Running Docker compose up with environment file \""$env_file"\"."
+        run_command="cd "$target"; docker compose --env-file "$env_file" up $params"
+    fi
+    
+    _run "$run_command"
+}

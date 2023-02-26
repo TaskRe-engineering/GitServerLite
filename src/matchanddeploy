@@ -9,50 +9,32 @@
 # 
 # This source code is licensed under the [] license found in the
 # LICENSE file in the root directory of this source tree. 
-# 
+#
 
 shopt -s nullglob
 
-ref=$1
-GIT_DIR=$2
+ref="$1"
+GIT_DIR="$2"
 
-source ".gitserverlite/env"
-DEPLOY_BRANCHES_DIR=".gitserverlite/deploy_branches"
-BRANCHES=($GIT_DIR/$DEPLOY_BRANCHES_DIR/*)
+GSL_DIR=".gitserverlite"
 
-DEPLOYED=false
+source "$GSL_DIR/env"
+source "$GSL_DIR/gsl-branch"
+source "$GSL_DIR/gsl-file"
+source "$GSL_DIR/gsl-deploy"
 
-for BRANCH_LOCATION in "${BRANCHES[@]}"
-do
-        source $BRANCH_LOCATION
-        BRANCH="$(basename $BRANCH_LOCATION)"
+GSL_DEPLOY_BRANCHES_DIR="$GSL_DIR/deploy_branches"
+get_branches
 
-        if [[ "$ref" = "refs/heads/$BRANCH" ]];
-        then
-                if [[ ! -z "$BRANCH" ]];
-                then
-                        echo "Ref $ref matching configuration received."
-                        echo "Executing configuration for branch: $BRANCH."
-                        
-                        TARGET="$DEPLOY_DIR/deploy_$BRANCH"
-                        echo "Deploying $BRANCH branch on server to target $TARGET..."
-                        mkdir -p $TARGET
-                        git --work-tree=$TARGET --git-dir=$GIT_DIR checkout -f $BRANCH
-                        
-                        if [[ -z "$ENV_FILE" ]];
-                        then
-                                echo "Running Docker compose. No environment file specified, so .env will be used if it exists."
-                                (cd $TARGET; docker compose up --detach)
-                        else
-                                echo "Running Docker compose with environment file $ENV_FILE."
-                                (cd $TARGET; docker compose --env-file $ENV_FILE up --build --detach)
-                        fi
-                        DEPLOYED=true
-                fi
-        fi
-done
-
-if [[ "$DEPLOYED" = "false" ]];
+match="$(match "$ref")"
+if [[ ! -z "$match" ]];
 then
-        echo "Ref $ref received. Doing nothing: does not match branches configured to automatically deploy."
+    echo "Ref $ref received. Matches branch configured to automatically deploy."
+
+    load_branch_file "$match"
+    branch="$(branch "$match")"
+    
+    process "$GIT_DIR" "$GSL_DEPLOY_DIR" "$GSL_DOCKER_COMPOSE_UP_PARAMS" "$branch" "$env_file"
+else
+    echo "Ref $ref received. Doing nothing: does not match branches configured to automatically deploy."
 fi

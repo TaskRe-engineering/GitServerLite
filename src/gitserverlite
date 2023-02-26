@@ -9,7 +9,7 @@
 # 
 # This source code is licensed under the [] license found in the
 # LICENSE file in the root directory of this source tree. 
-# 
+#
 
 ## Usage: gitserverlite <command> [<arguments>]
 ##
@@ -24,157 +24,22 @@
 
 shopt -s nullglob
 
-source ".gitserverlite/version"
-source ".gitserverlite/env"
-DEPLOY_BRANCHES_DIR=".gitserverlite/deploy_branches"
+command="$1"
+argument1="$2"
 
-COMMAND=$1
-ARGUMENT1=$2
+GSL_DIR=".gitserverlite"
 
-log() {
-    echo -e $1
-}
+source "$GSL_DIR/env"
+source "$GSL_DIR/gsl-io"
+source "$GSL_DIR/gsl-manage"
+source "$GSL_DIR/version"
 
-invalid() {
-    echo "Invalid: $1"
-    echo ""
-    display_manual
-    exit 1
-}
+GSL_DEPLOY_BRANCHES_DIR="$GSL_DIR/deploy_branches"
+get_branches
 
-error() {
-    echo -e "Error: $1"
-    exit 1
-}
-
-display_manual() {
-    [ "$*" ] && echo "$0: $*"
-    sed -n '/^##/,/^$/s/^## \{0,1\}//p' "$0"
-}
-
-add_branch() {
-    BRANCH_NAME=$1
-
-    if [[ -z $BRANCH_NAME ]];
-    then
-        invalid "branch name is required."
-    fi
-
-    if [[ "$BRANCH_NAME" =~ [^a-zA-Z0-9] ]];
-    then
-        invalid "branch name must be alphanumeric."
-    fi
-    
-    echo "Enter the .env file name: (optional)"
-    read ENV_FILE
-
-    _create_branch_file $BRANCH_NAME $ENV_FILE
-
-    log "Deploy record for branch \"$BRANCH_NAME\" successfully created."
-}
-
-remove_branch() {
-    BRANCH_NAME=$1
-
-    if [[ -z $BRANCH_NAME ]];
-    then
-        invalid "branch name is required."
-    fi
-
-    FILE="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
-
-    if [[ ! -f $FILE ]];
-    then
-        error "deploy record for branch \"$BRANCH_NAME\" not found."
-    fi
-
-    rm "$FILE"
-    log "Deploy record for branch $BRANCH_NAME successfully removed."
-}
-
-list() {
-    BRANCHES=($DEPLOY_BRANCHES_DIR/*)
-
-    if [[ ${#BRANCHES[@]} == 0 ]];
-    then
-        echo "There are no deploy branch records configured."
-    fi
-
-    for BRANCH in "${BRANCHES[@]}"
-    do
-        echo "$(basename $BRANCH)"
-    done
-}
-
-show_branch() {
-    BRANCH_NAME=$1
-
-    if [[ -z $BRANCH_NAME ]];
-    then
-        invalid "branch name is required."
-    fi
-
-    BRANCH="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
-
-    if [[ ! -f $BRANCH ]];
-    then
-        error "deploy record for branch \"$BRANCH_NAME\" not found."
-    fi
-
-    echo -e "Displaying record for deploy branch $BRANCH_NAME:"
-    echo "==== START ===="
-    cat $BRANCH
-    echo -e "===== END =====\n"
-}
-
-show_deploy_directory() {
-    echo "$DEPLOY_DIR/"
-}
-
-show_version() {
-    echo "gitserverlite version $VERSION"
-}
-
-_create_branch_file() {
-    BRANCH_NAME=$1
-    ENV_FILE=$2
-
-    FILE="$DEPLOY_BRANCHES_DIR/$BRANCH_NAME"
-
-    echo -e "# Deploy branch record for branch \"$BRANCH_NAME\"" > "$FILE"
-    
-    if [[ ! -z $ENV_FILE ]];
-    then
-        echo "ENV_FILE=$ENV_FILE" >> "$FILE"
-    fi
-}
-
-if [[ -z "$COMMAND" ]];
+(run_selection "$command" "$argument1")
+exit_status=$?
+if [[ $exit_status -ne 0 ]];
 then
-    invalid "command required."
-fi
-
-if [[ "$COMMAND" = "help" ]];
-then
-    display_manual
-elif [ "$COMMAND" = "add-branch" ];
-then
-    add_branch $ARGUMENT1
-elif [ "$COMMAND" = "remove-branch" ];
-then
-    remove_branch $ARGUMENT1
-elif [ "$COMMAND" = "list" ];
-then
-    list
-elif [ "$COMMAND" = "show-branch" ];
-then
-    show_branch $ARGUMENT1
-elif [ "$COMMAND" = "show-deploy-location" ];
-then
-    show_deploy_directory
-elif [ "$COMMAND" = "version" ];
-then
-    show_version
-else
-    invalid "unknown command \"$COMMAND\"."
+    handle_exit $exit_status
 fi

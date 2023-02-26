@@ -11,22 +11,29 @@
 # LICENSE file in the root directory of this source tree. 
 # 
 
-DESTINATION=$1
+DESTINATION="$1"
+
+copy_source_file() {
+    local source_file_name="$1"
+    
+    cp -f "src/$source_file_name" "$MAIN_DIR/"
+    chmod a+x "$MAIN_DIR/$source_file_name"
+}
 
 git fetch --tags
 
-if [[ -z $DESTINATION ]];
+if [[ -z "$DESTINATION" ]];
 then
     echo "Error: desination is required."
     exit 1
 fi
 
-git -C $DESTINATION rev-parse 2>/dev/null
+git -C "$DESTINATION" rev-parse 2>/dev/null
 if [[ $? = 0 ]];
 then
     echo "An existing Git repository was found at the destination."
-    IS_BARE=$(git -C $DESTINATION rev-parse --is-bare-repository)
-    if [[ "$IS_BARE" = "false" ]];
+    is_bare=$(git -C $DESTINATION rev-parse --is-bare-repository)
+    if [[ "$is_bare" = "false" ]];
     then
         echo "Error: This is not a bare repository. The installation can only proceed using a bare respoitory."
         echo "Create a new repository or select a different location."
@@ -40,15 +47,15 @@ else
     echo "Initializing a new installation at location $DESTINATION/"
     git init --bare "$DESTINATION"
 fi
-GIT_DIR=$DESTINATION
+GIT_DIR="$DESTINATION"
 
 HOOKS_DIR="$GIT_DIR/hooks"
 if [[ -f "$HOOKS_DIR/post-receive" ]];
 then
-    EXISTING_HASH=($(shasum "$HOOKS_DIR/post-receive"))
-    NEW_HASH=($(shasum "src/post-receive"))
+    existing_hash=($(shasum "$HOOKS_DIR/post-receive"))
+    new_hash=($(shasum "src/post-receive"))
 
-    if [[ "$EXISTING_HASH" = "$NEW_HASH" ]];
+    if [[ "$existing_hash" = "$new_hash" ]];
     then
         echo "An existing post-receive Git hook was found that matches the one in the installer."
         echo "Continuing with the installation..."
@@ -59,11 +66,11 @@ then
         echo -e "If you do not have a custom post-receive hook, then GitServerLite is simply updating the file.\n"
         echo "Are you sure you would like to continue? (y/n):"
     
-        read CONFIRMATION
-        if [[ "$CONFIRMATION" = "y" || "$CONFIRMATION" = "yes" ]];
+        read confirmation
+        if [[ "$confirmation" = "y" || "$confirmation" = "yes" ]];
         then
             echo "Continuing with the installation..."
-        elif [[ "$CONFIRMATION" = "n" || "$CONFIRMATION" = "no" ]];
+        elif [[ "$confirmation" = "n" || "$confirmation" = "no" ]];
         then
             echo "Error: Installation cancelled by user. No files were changed."
             exit 1
@@ -91,21 +98,36 @@ chmod a+x "$GIT_DIR/gitserverlite"
 MAIN_DIR="$GIT_DIR/.gitserverlite"
 mkdir -p "$MAIN_DIR"
 
-VERSION=$(git describe --tags)
-echo -e "VERSION=\"$VERSION\"" > "$MAIN_DIR/version"
+version=$(git describe --tags)
+echo -e "GSL_VERSION=\"$version\"" > "$MAIN_DIR/version"
 
-cp -f "src/matchanddeploy" "$MAIN_DIR/"
-chmod a+x "$MAIN_DIR/matchanddeploy"
+copy_source_file "gsl-branch"
+copy_source_file "gsl-deploy"
+copy_source_file "gsl-eval"
+copy_source_file "gsl-file"
+copy_source_file "gsl-git"
+copy_source_file "gsl-io"
+copy_source_file "gsl-manage"
+copy_source_file "matchanddeploy"
 
-if [[ -z $DEPLOY_DIR ]];
+if [[ -z "$GSL_DEPLOY_DIR" ]];
 then
-    DEPLOY_DIR="$GIT_DIR/deploy"
-    mkdir -p "$DEPLOY_DIR"
-    echo -e "DEPLOY_DIR=\"deploy\"" >> "$MAIN_DIR/env"
+    GSL_DEPLOY_DIR="$GIT_DIR/deploy"
+    mkdir -p "$GSL_DEPLOY_DIR"
+    echo -e "GSL_DEPLOY_DIR=\"deploy\"" >> "$MAIN_DIR/env"
     echo "Deploy location set to: \"deploy/\"."
 else
-    echo -e "Existing deploy location \"$DEPLOY_DIR/\" used."
+    echo -e "Existing deploy location \""$GSL_DEPLOY_DIR"/\" used."
 fi
 
-DEPLOY_BRANCHES_DIR="$MAIN_DIR/deploy_branches"
-mkdir -p "$DEPLOY_BRANCHES_DIR"
+if [[ -z "$GSL_DOCKER_COMPOSE_UP_PARAMS" ]];
+then
+    GSL_DOCKER_COMPOSE_UP_PARAMS="--build --detach"
+    echo -e "GSL_DOCKER_COMPOSE_UP_PARAMS=\"$GSL_DOCKER_COMPOSE_UP_PARAMS\"" >> "$MAIN_DIR/env"
+    echo "Docker compose up parameters set to: \""$GSL_DOCKER_COMPOSE_UP_PARAMS"\"."
+else
+    echo -e "Existing docker compose up parameters \""$GSL_DOCKER_COMPOSE_UP_PARAMS"\" used."
+fi
+
+GSL_DEPLOY_BRANCHES_DIR="$MAIN_DIR/deploy_branches"
+mkdir -p "$GSL_DEPLOY_BRANCHES_DIR"

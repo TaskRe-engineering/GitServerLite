@@ -1,0 +1,128 @@
+#!/bin/bash
+
+#for debugging
+#set -ex
+
+#
+# Copyright © 2023 Task Re-engineering Inc.
+# All rights reserved.
+# 
+# This source code is licensed under the [] license found in the
+# LICENSE file in the root directory of this source tree. 
+#
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+source "$SCRIPT_DIR/gsl-eval"
+source "$SCRIPT_DIR/gsl-file"
+source "$SCRIPT_DIR/gsl-branch"
+
+display_manual() {
+    [ "$*" ] && echo "$0: $*"
+    sed -n '/^##/,/^$/s/^## \{0,1\}//p' "$0"
+}
+
+add_branch() {
+    local branch_name="$1"
+
+    if [[ -z "$branch_name" ]];
+    then
+        exit 1
+    fi
+
+    validate_branch_name "$branch_name"
+    
+    echo "Enter the .env file name: (optional)"
+    read -e env_file
+
+    local run_command="create_branch_file "$branch_name" "$env_file""
+    _run "$run_command"
+}
+
+remove_branch() {
+    local branch_name="$1"
+
+    if [[ -z "$branch_name" ]];
+    then
+        exit 1
+    fi
+
+    local file="$GSL_DEPLOY_BRANCHES_DIR/$branch_name"
+
+    local run_command="remove_branch_file "$file""
+    _run "$run_command"
+}
+
+list() {
+    if [[ ${#GSL_BRANCHES[@]} == 0 ]];
+    then
+        echo "There are no deploy branch records configured."
+    fi
+
+    for branch_location in "${GSL_BRANCHES[@]}"
+    do
+        echo "$(branch "$branch_location" "$GSL_DEPLOY_BRANCHES_DIR")"
+    done
+}
+
+show_branch() {
+    local branch_name="$1"
+
+    if [[ -z "$branch_name" ]];
+    then
+        exit 1
+    fi
+
+    local branch_location="$GSL_DEPLOY_BRANCHES_DIR/$branch_name"
+
+    if [[ ! -f "$branch_location" ]];
+    then
+        exit 65
+    fi
+
+    echo -e "Displaying record for deploy branch $branch_name:"
+    echo "==== START ===="
+    cat "$branch_location"
+    echo -e "===== END =====\n"
+}
+
+show_deploy_directory() {
+    echo "$GSL_DEPLOY_DIR/"
+}
+
+show_version() {
+    echo "gitserverlite version $GSL_VERSION"
+}
+
+run_selection() {
+    command="$1"
+    argument1="$2"
+
+    local run_command=""
+    if [[ "$command" = "help" ]];
+    then
+        run_command="display_manual"
+    elif [ "$command" = "add-branch" ];
+    then
+        run_command="add_branch "$argument1""
+    elif [ "$command" = "remove-branch" ];
+    then
+        run_command="remove_branch "$argument1""
+    elif [ "$command" = "list" ];
+    then
+        run_command="list"
+    elif [ "$command" = "show-branch" ];
+    then
+        run_command="show_branch "$argument1""
+    elif [ "$command" = "show-deploy-location" ];
+    then
+        run_command="show_deploy_directory"
+    elif [ "$command" = "version" ];
+    then
+        run_command="show_version"
+    else
+        exit 1
+    fi
+    
+    _run "$run_command"
+}

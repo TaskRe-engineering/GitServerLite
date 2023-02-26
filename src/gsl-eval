@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#for debugging
+#set -ex
+
+#
+# Copyright © 2023 Task Re-engineering Inc.
+# All rights reserved.
+# 
+# This source code is licensed under the [] license found in the
+# LICENSE file in the root directory of this source tree. 
+#
+
+_run() {
+    local run_command="$1"
+
+    if [[ -z "$run_command" ]];
+    then
+        exit 1
+    fi
+
+    eval "$run_command"
+}

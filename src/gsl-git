@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#for debugging
+#set -ex
+
+#
+# Copyright © 2023 Task Re-engineering Inc.
+# All rights reserved.
+# 
+# This source code is licensed under the [] license found in the
+# LICENSE file in the root directory of this source tree. 
+#
+
+checkout() {
+    local git_dir="$1"
+    local branch="$2"
+    local target="$3"
+
+    if [[ -z "$git_dir" || -z "$branch" || -z "$target" ]];
+    then
+        exit 1
+    fi
+    
+    local run_command="mkdir -p "$target"; git --work-tree="$target" --git-dir="$git_dir" checkout -f "$branch""
+    _run "$run_command"
+}
