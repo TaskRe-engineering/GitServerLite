@@ -31,17 +31,19 @@
 #for debugging
 #set -ex
 
+git_dir=$(pwd)
+
 while read oldrev newrev ref
 do
-    if [[ -f "$GIT_DIR/hooks/pre-deploy" ]];
+    if [[ -f "$git_dir/hooks/pre-deploy" ]];
     then
-        "$GIT_DIR/hooks/pre-deploy"
+        "$git_dir/hooks/pre-deploy"
     fi
 
-    "$GIT_DIR/.gitserverlite/matchanddeploy" "$ref" "$GIT_DIR"
+    "$git_dir/.gitserverlite/matchanddeploy" "$ref" "$git_dir"
 
-    if [[ -f "$GIT_DIR/hooks/post-deploy" ]];
+    if [[ -f "$git_dir/hooks/post-deploy" ]];
     then
-        "$GIT_DIR/hooks/post-deploy"
+        "$git_dir/hooks/post-deploy"
     fi
 done

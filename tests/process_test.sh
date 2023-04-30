@@ -73,12 +73,17 @@ test_process_NoBranch_ExpectedExitStatus() {
 
 test_process_NoEnvFile_ReturnsExpected() {
     process /var/git/my_repo.git /var/deploy "--build --deploy" main
-    assertEquals "checkout /var/git/my_repo.git main /var/deploy/deploy_main; deploy /var/deploy/deploy_main \"--build --deploy\" " "$GSL_LAST_RUN"
+    assertEquals "checkout /var/git/my_repo.git main /var/deploy/deploy_main; deploy /var/deploy/deploy_main \"--build --deploy\" ; clean /var/deploy/deploy_main" "$GSL_LAST_RUN"
+}
+
+test_process_RelativeDeployDir_ReturnsExpected() {
+    process /var/git/my_repo.git deploy "--build --deploy" main
+    assertEquals "checkout /var/git/my_repo.git main /var/git/my_repo.git/deploy/deploy_main; deploy /var/git/my_repo.git/deploy/deploy_main \"--build --deploy\" ; clean /var/git/my_repo.git/deploy/deploy_main" "$GSL_LAST_RUN"
 }
 
 test_process_ValidEnvFile_ReturnsExpected() {
     process /var/git/my_repo.git /var/deploy "--build --deploy" main .env.dev
-    assertEquals "checkout /var/git/my_repo.git main /var/deploy/deploy_main; deploy /var/deploy/deploy_main \"--build --deploy\" .env.dev" "$GSL_LAST_RUN"
+    assertEquals "checkout /var/git/my_repo.git main /var/deploy/deploy_main; deploy /var/deploy/deploy_main \"--build --deploy\" .env.dev; clean /var/deploy/deploy_main" "$GSL_LAST_RUN"
 }
 
 # Load shUnit2.

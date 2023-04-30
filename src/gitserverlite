@@ -48,7 +48,8 @@ shopt -s nullglob
 command="$1"
 argument1="$2"
 
-GSL_DIR=".gitserverlite"
+current_dir=$(pwd)
+GSL_DIR=""$current_dir"/.gitserverlite"
 
 . "$GSL_DIR/env"
 . "$GSL_DIR/gsl-source"

@@ -88,9 +88,15 @@ process() {
     then
         exit 1
     fi
+
+    if [[ "$deploy_dir" == /* ]];
+    then
+        target="$deploy_dir/deploy_$branch"
+    else
+        target="$git_dir/$deploy_dir/deploy_$branch"
+    fi
     
-    target="$deploy_dir/deploy_$branch"
-    run_command="checkout "$git_dir" "$branch" "$target"; deploy "$target" \""$params"\" "$env_file""
+    run_command="checkout "$git_dir" "$branch" "$target"; deploy "$target" \""$params"\" "$env_file"; clean "$target""
     _run "$run_command"
 }
 
@@ -113,6 +119,18 @@ deploy() {
         run_command="cd "$target"; docker compose --env-file "$env_file" up $params"
     fi
     
+    _run "$run_command"
+}
+
+clean() {
+    target="$1"
+
+    if [[ -z "$target" || "$target" == "/" ]];
+    then
+        exit 1
+    fi
+
+    run_command="rm -rf "$target""
     _run "$run_command"
 }
 
@@ -167,7 +185,7 @@ checkout() {
         exit 1
     fi
     
-    run_command="mkdir -p "$target"; git --work-tree="$target" --git-dir="$git_dir" checkout -f "$branch""
+    run_command="mkdir -p "$target"; git --work-tree="$target" --git-dir="$git_dir" checkout -f "$branch"; git --git-dir="$git_dir" --work-tree=. -C "$target" submodule update --init --recursive --force"
     _run "$run_command"
 }
 

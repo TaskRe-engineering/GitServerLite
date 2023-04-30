@@ -21,39 +21,50 @@
 #                 that automatically deploys your Dockerized services for you.
 #                 https://github.com/TaskRe-engineering/GitServerLite
 # 
-# File: matchanddeploy
+# File: branch_test.sh
 # Author: Kier von Konigslow
-# Created: February 9, 2023
+# Created: April 30, 2023
 # 
-# This script matches a push to a deployment branch
-# and then runs the deployment process.
+# This script contains unit tests for the clean function.
 # 
 
-#for debugging
-#set -ex
+. "../src/gsl-source"
 
-shopt -s nullglob
+# Mocks and Stubs
 
-ref="$1"
-git_dir="$2"
+_run() {
+    command="$1"
 
-GSL_DIR=""$git_dir"/.gitserverlite"
+    if [[ -z "$command" ]];
+    then
+        exit 1
+    fi
 
-. "$GSL_DIR/env"
-. "$GSL_DIR/gsl-source"
+    GSL_LAST_RUN="$command"
+}
 
-GSL_DEPLOY_BRANCHES_DIR="$GSL_DIR/deploy_branches"
-get_branches
+# SetUp and tearDown
 
-match="$(match "$ref")"
-if [[ ! -z "$match" ]];
-then
-    printf "Ref \"%s\" received. Matches branch configured to automatically deploy.\n" "$ref"
+setUp() {
+    GSL_LAST_RUN=""
+}
 
-    load_branch_file "$match"
-    branch="$(branch "$match")"
-    
-    process "$git_dir" "$GSL_DEPLOY_DIR" "$GSL_DOCKER_COMPOSE_UP_PARAMS" "$branch" "$env_file"
-else
-    printf "Ref \"%s\" received. Doing nothing: does not match branches configured to automatically deploy.\n" "$ref"
-fi
+# Tests
+
+test_clean_NoTarget_ExpectedExitStatus() {
+    (clean)
+    assertEquals 1 "$?"
+}
+
+test_clean_TargetIsRoot_ExpectedExitStatus() {
+    (clean /)
+    assertEquals 1 "$?"
+}
+
+test_clean_ValidTarget_ReturnsExpected() {
+    clean /var/deploy/deploy_main
+    assertEquals "rm -rf /var/deploy/deploy_main" "$GSL_LAST_RUN"
+}
+
+# Load shUnit2.
+. ./shunit2
