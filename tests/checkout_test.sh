@@ -68,7 +68,7 @@ test_checkout_NoTarget_ExpectedExitStatus() {
 
 test_checkout_ValidParametersSingleWorkdBranch_ReturnsExpected() {
     checkout /var/git/my_repo.git main /var/deploy/deploy_main
-    assertEquals "mkdir -p /var/deploy/deploy_main; git --work-tree=/var/deploy/deploy_main --git-dir=/var/git/my_repo.git checkout -f main" "$GSL_LAST_RUN"
+    assertEquals "mkdir -p /var/deploy/deploy_main; git --work-tree=/var/deploy/deploy_main --git-dir=/var/git/my_repo.git checkout -f main; git --git-dir=/var/git/my_repo.git --work-tree=. -C /var/deploy/deploy_main submodule update --init --recursive --force" "$GSL_LAST_RUN"
 }
 
 # Load shUnit2.
